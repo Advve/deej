@@ -114,7 +114,11 @@ void showKaomojiAnimation() {
       "(=^o^=)",
       "(^OwO^)",
       "(^UwU^)",
-      "(=^.^=)"
+      "(=^.^=)",
+      "A",
+      "AD",
+      "ADV",
+      "ADVE"
   };
 
   int totalFrames = sizeof(kaomojiFrames) / sizeof(kaomojiFrames[0]);
