@@ -16,7 +16,7 @@ const int analogInputs[NUM_SLIDERS] = {A0, A1, A2, A3, A6};
 
 int analogSliderValues[NUM_SLIDERS];
 int previousSliderValues[NUM_SLIDERS]; // Store previous values
-const int DEADBAND = 15; // Margin of error to ignore small changes
+const int DEADBAND = 20; // Margin of error to ignore small changes
 const unsigned long IDLE_TIMEOUT = 5000; // Time in milliseconds to switch to idle mode
 unsigned long lastActiveTime = 0; // Tracks the last time sliders were active
 
