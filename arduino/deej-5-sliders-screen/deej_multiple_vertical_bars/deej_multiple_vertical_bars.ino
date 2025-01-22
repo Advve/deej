@@ -1,4 +1,5 @@
 #include <Wire.h>
+#include <stdint.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -18,6 +19,9 @@ int analogSliderValues[NUM_SLIDERS];
 int previousSliderValues[NUM_SLIDERS]; // Store previous values
 const int DEADBAND = 20; // Margin of error to ignore small changes
 const unsigned long IDLE_TIMEOUT = 5000; // Time in milliseconds to switch to idle mode
+uint8_t BRIGHTNESS_IDLE = 0x10; // Display brightness when idle
+const bool DISPLAYOFF = true; // Option to switch display off when idle too long
+const unsigned long DISPLAYOFF_TIMEOUT = 60000 ;// Time in milliseconds to switch display off when idle too long
 unsigned long lastActiveTime = 0; // Tracks the last time sliders were active
 
 void setup() {
@@ -38,9 +42,19 @@ void setup() {
 
 void loop() {
   if (checkIfActive()) {
+    display.ssd1306_command(SSD1306_DISPLAYON); // Ensure the display is on when active
+    display.ssd1306_command(SSD1306_SETCONTRAST);
+    display.ssd1306_command(0xFF); // Restore full brightness
     sendSliderValues(); // Show bars when active
   } else {
-    showKaomojiAnimation(); // Show kaomoji when idle
+    if (millis() - lastActiveTime > IDLE_TIMEOUT + DISPLAYOFF_TIMEOUT && DISPLAYOFF == true) { // If inactive for extended period
+      display.ssd1306_command(SSD1306_DISPLAYOFF); // Turn off the display
+    } else {
+      display.ssd1306_command(SSD1306_DISPLAYON); // Ensure display is on for animation
+      display.ssd1306_command(SSD1306_SETCONTRAST);
+      display.ssd1306_command(BRIGHTNESS_IDLE); // Dim the display during idle animation
+      showKaomojiAnimation(); // Show kaomoji when idle
+    }
   }
   delay(10);
 }
@@ -70,7 +84,6 @@ bool checkIfActive() {
   // Return true if within active time window
   return (millis() - lastActiveTime) < IDLE_TIMEOUT;
 }
-
 
 void sendSliderValues() {
   display.clearDisplay();
