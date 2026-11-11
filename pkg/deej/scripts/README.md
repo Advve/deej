@@ -16,5 +16,5 @@ This document lists the various scripts in the project and their purposes.
 ### Linux
 
 - [`build-dev.sh`](./linux/build-dev.sh): Builds deej for development purposes
-- [`build-release.sh`](./linux/build-release.sh): Builds deej for releases
+- [`build-release.sh`](./linux/build-release.sh): Builds deej for releases (a static binary: no cgo, no system libraries needed)
 - [`build-all.sh`](./linux/build-all.sh): Helper script to build all variants

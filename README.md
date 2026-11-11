@@ -26,6 +26,7 @@ It has two parts: a small desktop app written in Go, and an Arduino board with a
 
 ## What's new in this fork
 
+- **Builds and runs on current Linux distributions.** The original's tray icon needed WebKit2GTK 4.0 and libappindicator3, which Ubuntu 24.04 and other current distributions no longer ship. This fork uses a tray library that talks to the desktop over D-Bus, so the Linux build is a single static binary that needs no extra packages.
 - **Works with current CH340 drivers on Windows.** Many Arduino Nano clones use a CH340 USB chip. Since driver version 3.8 (2023), Windows returns empty reads from it, and the original deej connects but never reads a single slider value. This fork waits those out, so deej works on both old and new drivers.
 - **Support for boards with a screen.** deej now tells the board what each slider controls: a label, an icon, whether the current OS can drive it, and whether its app is running. It also sends a keepalive, so the board can tell when deej isn't running. See [Boards with a screen](#boards-with-a-screen).
 - **[`deej-5-sliders-oled`](./arduino/deej-5-sliders-oled) firmware** for an Arduino Nano with 5 knobs and a 1.3" OLED, which shows all of that.
@@ -206,20 +207,16 @@ This fork doesn't publish releases yet. [Build deej from source](#building-from-
 3. Make sure your user can open serial ports: `sudo usermod -aG dialout $USER`, then log out and back in.
 4. Use Linux app names in `slider_mapping` (`spotify`, not `spotify.exe`).
 
+The tray icon uses the StatusNotifierItem (AppIndicator) standard. KDE Plasma, Xfce, Cinnamon, MATE, Budgie and most other desktops show it. GNOME needs the "AppIndicator and KStatusNotifierItem Support" extension, which Ubuntu enables by default. Without a tray, deej still works but has no icon. Stop it with `pkill deej-release` (or whatever you named the file). "Edit configuration" in the tray menu opens `config.yaml` in your default text editor.
+
 ## Building from source
 
-You need Go 1.14 or newer (1.22 is known to work).
+You need Go 1.19 or newer (1.22 is known to work).
 
 - **Windows:** run `pkg\deej\scripts\windows\build-release.bat`. It writes `deej-release.exe` in the repository root.
 - **Linux:** run `pkg/deej/scripts/linux/build-release.sh` from the repository root. It writes `deej-release`.
 
-The Linux build needs the development files for GTK 3, WebKit2GTK 4.0 and AppIndicator 3 (pkg-config names `gtk+-3.0`, `webkit2gtk-4.0`, `appindicator3-0.1`). On Ubuntu 22.04:
-
-```bash
-sudo apt install libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev
-```
-
-Newer distributions (Ubuntu 24.04 and later) no longer ship WebKit2GTK 4.0 or the original AppIndicator, so deej can't be built there yet. This comes from the system tray library deej uses.
+The Linux build needs no system packages. It's pure Go and produces a static binary that runs on any distribution, so you can also build it on Windows or macOS: `GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build ./pkg/deej/cmd` (or `GOARCH=arm64` for a Raspberry Pi).
 
 `build-dev.bat` / `build-dev.sh` build a console version that shows logs. `deej -v` turns on verbose logging, which shows every line read from the board.
 

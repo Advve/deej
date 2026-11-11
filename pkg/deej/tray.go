@@ -1,7 +1,9 @@
 package deej
 
 import (
-	"github.com/getlantern/systray"
+	// fyne.io/systray draws the Linux tray icon over D-Bus (StatusNotifierItem), so unlike the
+	// old getlantern/systray it needs no GTK, WebKit or libappindicator, and no cgo at all
+	"fyne.io/systray"
 
 	"github.com/omriharel/deej/pkg/deej/icon"
 	"github.com/omriharel/deej/pkg/deej/util"
@@ -47,9 +49,11 @@ func (d *Deej) initializeTray(onDone func()) {
 				case <-editConfig.ClickedCh:
 					logger.Info("Edit config menu item clicked, opening config for editing")
 
+					// on Linux, open it with whatever the desktop uses for text files
+					// (current GNOME no longer ships gedit)
 					editor := "notepad.exe"
 					if util.Linux() {
-						editor = "gedit"
+						editor = "xdg-open"
 					}
 
 					if err := util.OpenExternal(logger, editor, userConfigFilepath); err != nil {
@@ -62,7 +66,9 @@ func (d *Deej) initializeTray(onDone func()) {
 
 					// performance: the reason that forcing a refresh here is okay is that users can't spam the
 					// right-click -> select-this-option sequence at a rate that's meaningful to performance
+					d.sessions.opLock.Lock()
 					d.sessions.refreshSessions(true)
+					d.sessions.opLock.Unlock()
 				}
 			}
 		}()

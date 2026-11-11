@@ -10,7 +10,7 @@ Bug reports, ideas and pull requests are welcome here on GitHub. This is a fork 
 
 ## Development
 
-- Go 1.14 or newer (1.22 is known to work). Build with the scripts in [`pkg/deej/scripts`](../pkg/deej/scripts), which embed the version, or see [Building from source](../README.md#building-from-source).
+- Go 1.19 or newer (1.22 is known to work). Build with the scripts in [`pkg/deej/scripts`](../pkg/deej/scripts), which embed the version, or see [Building from source](../README.md#building-from-source).
 - Run the tests with `go test ./pkg/deej/`.
 - Firmware: open the sketch in the Arduino IDE, or compile it with `arduino-cli compile --fqbn arduino:avr:nano arduino/deej-5-sliders-oled`. The OLED sketch needs the U8g2 library.
 - The OLED icons are generated: edit the art in [`tools/gen_icons.go`](../arduino/deej-5-sliders-oled/tools/gen_icons.go) and run `go run gen_icons.go` in that folder, rather than editing `icons.h` by hand.
