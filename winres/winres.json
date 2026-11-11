@@ -33,22 +33,22 @@
     "#1": {
       "0000": {
         "fixed": {
-          "file_version": "0.1.0.0",
-          "product_version": "0.1.0.0"
+          "file_version": "0.2.0.0",
+          "product_version": "0.2.0.0"
         },
         "info": {
           "0409": {
             "Comments": "Hardware volume mixer: sets app volumes from knobs and sliders on an Arduino",
             "CompanyName": "Adve",
             "FileDescription": "deej",
-            "FileVersion": "0.1.0",
+            "FileVersion": "0.2.0",
             "InternalName": "deej",
             "LegalCopyright": "Copyright (c) 2020 Omri Harel, 2026 Adve. MIT License.",
             "LegalTrademarks": "",
             "OriginalFilename": "deej.exe",
             "PrivateBuild": "",
             "ProductName": "deej",
-            "ProductVersion": "0.1.0",
+            "ProductVersion": "0.2.0",
             "SpecialBuild": ""
           }
         }

@@ -252,6 +252,13 @@ Releases are built by GitHub Actions; see [Releasing](./docs/CONTRIBUTING.md#rel
 
 ## Changelog
 
+- **0.2.0**, automatic reconnecting
+  - Reconnects automatically when the board is unplugged and plugged back in, or after the PC
+    wakes from sleep; no more restarting deej
+  - Waits for the board at startup ("Waiting for COMx") instead of quitting when it isn't plugged in
+  - Lets go of a busy port and retries every 2 seconds, so flashing the board while deej runs works
+  - Every slider's volume and the screen labels are sent again after reconnecting
+
 - **0.1.0** (first release of this fork), based on deej 0.9.10 by Omri Harel
   - Works with CH340 USB drivers 3.8 and newer on Windows, which the original reads nothing from
   - Builds and runs on current Linux distributions: pure Go, no GTK, WebKit or AppIndicator
