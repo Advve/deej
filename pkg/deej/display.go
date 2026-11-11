@@ -50,7 +50,7 @@ const (
 	displayActivityRefresh   = 10 * time.Second
 )
 
-// icon names the board knows about (deej_oled_link's ICON_NAMES)
+// icon names the board knows about (ICON_NAMES in arduino/deej-5-sliders-oled)
 var displayIcons = []string{"speaker", "music", "globe", "headset", "window", "mic", "muted",
 	"game", "chat", "video", "micoff"}
 
