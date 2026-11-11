@@ -25,3 +25,12 @@ baud_rate: 9600
 # adjust the amount of signal noise reduction depending on your hardware quality
 # supported values are "low" (excellent hardware), "default" (regular hardware) or "high" (bad, noisy hardware)
 noise_reduction: default
+
+# optional - for boards with a screen. deej sends each slider's label, icon and whether this OS can drive it
+# (deej.current, system and device names are windows only). without these, deej picks them from slider_mapping
+# (master -> MASTER, spotify.exe -> SPOTIFY, a group of browsers -> BROWSER, deej.current -> ACTIVE)
+# labels are cut to 10 characters. icons: speaker, music, globe, headset, window, mic
+# slider_labels:
+#   3: GAMES
+# slider_icons:
+#   3: window

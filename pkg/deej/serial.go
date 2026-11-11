@@ -8,6 +8,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/jacobsa/go-serial/serial"
@@ -33,6 +35,10 @@ type SerialIO struct {
 	currentSliderPercentValues []float32
 
 	sliderMoveConsumers []chan SliderMoveEvent
+
+	// 1 when the board should get display info (labels) with the next slider line, see display.go
+	displayPending int32
+	writeLock      sync.Mutex
 }
 
 // SliderMoveEvent represents a single slider move captured by deej
@@ -109,9 +115,12 @@ func (sio *SerialIO) Start() error {
 	namedLogger.Infow("Connected", "conn", sio.conn)
 	sio.connected = true
 
+	// the board may reset when the port opens, so wait for its first line before sending labels
+	atomic.StoreInt32(&sio.displayPending, 1)
+
 	// read lines or await a stop
 	go func() {
-		connReader := bufio.NewReader(sio.conn)
+		connReader := bufio.NewReader(&emptyReadRetrier{r: sio.conn})
 		lineChannel := sio.readLine(namedLogger, connReader)
 
 		for {
@@ -164,6 +173,9 @@ func (sio *SerialIO) setupOnConfigReload() {
 				go func() {
 					<-time.After(stopDelay)
 					sio.lastKnownNumSliders = 0
+
+					// labels may have changed too: resend them with the next slider line
+					atomic.StoreInt32(&sio.displayPending, 1)
 				}()
 
 				// if connection params have changed, attempt to stop and start the connection
@@ -188,6 +200,9 @@ func (sio *SerialIO) setupOnConfigReload() {
 }
 
 func (sio *SerialIO) close(logger *zap.SugaredLogger) {
+	sio.writeLock.Lock()
+	defer sio.writeLock.Unlock()
+
 	if err := sio.conn.Close(); err != nil {
 		logger.Warnw("Failed to close serial connection", "error", err)
 	} else {
@@ -296,6 +311,11 @@ func (sio *SerialIO) handleLine(logger *zap.SugaredLogger, line string) {
 		}
 	}
 
+	// the board is up and talking: send it the labels, if it hasn't had them since (re)connecting
+	if atomic.CompareAndSwapInt32(&sio.displayPending, 1, 0) {
+		go sio.sendDisplayInfo(logger, numSliders)
+	}
+
 	// deliver move events if there are any, towards all potential consumers
 	if len(moveEvents) > 0 {
 		for _, consumer := range sio.sliderMoveConsumers {
@@ -303,5 +323,24 @@ func (sio *SerialIO) handleLine(logger *zap.SugaredLogger, line string) {
 				consumer <- moveEvent
 			}
 		}
+	}
+}
+
+// emptyReadRetrier waits out reads that return no data and no error. Newer CH340 drivers on
+// Windows (3.8 / 3.9, 2023 onwards) do that between bytes instead of blocking, and bufio gives
+// up after 100 of them in a row ("multiple Read calls return no data or error"), which ended
+// the connection right after it opened. Older drivers never return empty, so nothing changes there
+type emptyReadRetrier struct {
+	r io.Reader
+}
+
+func (e *emptyReadRetrier) Read(p []byte) (int, error) {
+	for {
+		n, err := e.r.Read(p)
+		if n > 0 || err != nil || len(p) == 0 {
+			return n, err
+		}
+
+		time.Sleep(5 * time.Millisecond)
 	}
 }

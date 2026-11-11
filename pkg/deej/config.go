@@ -27,7 +27,11 @@ type CanonicalConfig struct {
 
 	NoiseReductionLevel string
 
-	logger             *zap.SugaredLogger
+	// optional overrides for what a board with a screen shows per slider (see display.go)
+	SliderLabels map[int]string
+	SliderIcons  map[int]string
+
+	logger            *zap.SugaredLogger
 	notifier           Notifier
 	stopWatcherChannel chan bool
 
@@ -53,6 +57,8 @@ const (
 	configKeyCOMPort             = "com_port"
 	configKeyBaudRate            = "baud_rate"
 	configKeyNoiseReductionLevel = "noise_reduction"
+	configKeySliderLabels        = "slider_labels"
+	configKeySliderIcons         = "slider_icons"
 
 	defaultCOMPort  = "COM4"
 	defaultBaudRate = 9600
@@ -238,6 +244,9 @@ func (cc *CanonicalConfig) populateFromVipers() error {
 
 	cc.InvertSliders = cc.userConfig.GetBool(configKeyInvertSliders)
 	cc.NoiseReductionLevel = cc.userConfig.GetString(configKeyNoiseReductionLevel)
+
+	cc.SliderLabels = intKeyedStringMap(cc.userConfig.GetStringMapString(configKeySliderLabels))
+	cc.SliderIcons = intKeyedStringMap(cc.userConfig.GetStringMapString(configKeySliderIcons))
 
 	cc.logger.Debug("Populated config fields from vipers")
 
