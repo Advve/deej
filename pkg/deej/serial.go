@@ -39,6 +39,12 @@ type SerialIO struct {
 	// 1 when the board should get display info (labels) with the next slider line, see display.go
 	displayPending int32
 	writeLock      sync.Mutex
+
+	// sliders the board reported since this connection opened; 0 until its first line arrives
+	displaySliders int32
+
+	// closed when this connection closes, to stop its display keepalive
+	connDone chan struct{}
 }
 
 // SliderMoveEvent represents a single slider move captured by deej
@@ -117,6 +123,11 @@ func (sio *SerialIO) Start() error {
 
 	// the board may reset when the port opens, so wait for its first line before sending labels
 	atomic.StoreInt32(&sio.displayPending, 1)
+	atomic.StoreInt32(&sio.displaySliders, 0)
+
+	// tell the board every few seconds that deej is alive and which apps are running
+	sio.connDone = make(chan struct{})
+	go sio.runDisplayKeepalive(namedLogger, sio.connDone)
 
 	// read lines or await a stop
 	go func() {
@@ -202,6 +213,11 @@ func (sio *SerialIO) setupOnConfigReload() {
 func (sio *SerialIO) close(logger *zap.SugaredLogger) {
 	sio.writeLock.Lock()
 	defer sio.writeLock.Unlock()
+
+	if sio.connDone != nil {
+		close(sio.connDone)
+		sio.connDone = nil
+	}
 
 	if err := sio.conn.Close(); err != nil {
 		logger.Warnw("Failed to close serial connection", "error", err)
@@ -312,6 +328,7 @@ func (sio *SerialIO) handleLine(logger *zap.SugaredLogger, line string) {
 	}
 
 	// the board is up and talking: send it the labels, if it hasn't had them since (re)connecting
+	atomic.StoreInt32(&sio.displaySliders, int32(numSliders))
 	if atomic.CompareAndSwapInt32(&sio.displayPending, 1, 0) {
 		go sio.sendDisplayInfo(logger, numSliders)
 	}

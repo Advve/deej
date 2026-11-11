@@ -23,6 +23,12 @@ type sessionMap struct {
 
 	lastSessionRefresh time.Time
 	unmappedSessions   []Session
+
+	// serializes the things that refresh or use sessions (slider moves, config reloads and the
+	// display's activity check), so a refresh can't release sessions while a slider is using them
+	opLock sync.Mutex
+
+	lastLoggedSessionCount int
 }
 
 const (
@@ -117,7 +123,13 @@ func (m *sessionMap) getAndAddSessions() error {
 		}
 	}
 
-	m.logger.Infow("Got all audio sessions successfully", "sessionMap", m)
+	// the display's activity check refreshes every few seconds, so only log at info level on changes
+	if count := len(sessions); count != m.lastLoggedSessionCount {
+		m.lastLoggedSessionCount = count
+		m.logger.Infow("Got all audio sessions successfully", "sessionMap", m)
+	} else {
+		m.logger.Debugw("Got all audio sessions successfully", "sessionMap", m)
+	}
 
 	return nil
 }
@@ -130,7 +142,9 @@ func (m *sessionMap) setupOnConfigReload() {
 			select {
 			case <-configReloadedChannel:
 				m.logger.Info("Detected config reload, attempting to re-acquire all audio sessions")
+				m.opLock.Lock()
 				m.refreshSessions(false)
+				m.opLock.Unlock()
 			}
 		}
 	}()
@@ -207,6 +221,8 @@ func (m *sessionMap) sessionMapped(session Session) bool {
 }
 
 func (m *sessionMap) handleSliderMoveEvent(event SliderMoveEvent) {
+	m.opLock.Lock()
+	defer m.opLock.Unlock()
 
 	// first of all, ensure our session map isn't moldy
 	if m.lastSessionRefresh.Add(maxTimeBetweenSessionRefreshes).Before(time.Now()) {

@@ -51,6 +51,27 @@ func TestBuildDisplayLines(t *testing.T) {
 	}
 }
 
+func TestDescribeNewCategories(t *testing.T) {
+	cases := map[string]displaySlider{
+		"vlc.exe":      {icon: "video", label: "VLC"},
+		"telegram.exe": {icon: "chat", label: "TELEGRAM"},
+		"steam":        {icon: "game", label: "STEAM"},
+	}
+
+	for target, want := range cases {
+		got := describeSlider([]string{target})
+		if got.icon != want.icon || got.label != want.label {
+			t.Errorf("%s: got %+v, want icon %q label %q", target, got, want.icon, want.label)
+		}
+	}
+
+	for _, icon := range []string{"game", "chat", "video", "micoff", "muted"} {
+		if !isDisplayIcon(icon) {
+			t.Errorf("%q should be a known icon", icon)
+		}
+	}
+}
+
 func TestDescribeMixedGroup(t *testing.T) {
 	if got := describeSlider([]string{"game.exe", "spotify.exe"}).label; got != "GAME+" {
 		t.Errorf("got %q, want GAME+", got)
