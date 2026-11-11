@@ -472,7 +472,7 @@ void drawFocus(uint8_t i, unsigned long now) {
 }
 
 const uint8_t *kaomojiFont(const char *s) {
-  return strlen(s) <= 4 ? u8g2_font_logisoso20_tr : u8g2_font_7x14B_tr;  // the A-D-V-E frames big
+  return strlen(s) <= 4 ? u8g2_font_logisoso20_tr : u8g2_font_7x14B_tr;  // short frames big
 }
 
 void nextKaomoji() {  // next frame at a new random spot, so no pixel stays lit for long

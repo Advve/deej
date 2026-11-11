@@ -69,7 +69,10 @@ const unsigned long SAMPLE_MS      = 10;     // knob read interval
 const unsigned long FRAME_MS       = 33;     // max ~30 fps redraw
 
 // ---------------------------------------------------------------- screensaver
+// Frames shown in order, each at a random spot so no pixel stays lit for long. Plain ASCII only
+// (the fonts have no other characters). Up to 4 characters use a big font; longer frames use a
+// smaller one that fits about 9 characters across the 64 px wide screen. They're kept in RAM, so
+// a few dozen short frames are fine.
 const char *const KAOMOJI_FRAMES[] = {
   "(=^_^=)", "(=^-^=)", "(=^w^=)", "(^._.^)", "(=^o^=)", "(^OwO^)", "(^UwU^)", "(=^.^=)",
-  "A", "AD", "ADV", "ADVE",
 };
