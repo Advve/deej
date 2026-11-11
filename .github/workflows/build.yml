@@ -1,11 +1,11 @@
-# Builds and tests deej on every push and pull request.
+# Builds and tests deej, and compiles the Arduino sketches, on every push and pull request.
 # On a version tag (v1.2.3) it also publishes a GitHub Release with the downloads, checksums,
 # third-party notices and release notes taken from the README's changelog.
 name: build
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
@@ -62,10 +62,34 @@ jobs:
           name: deej
           path: dist/*
 
+  # Compiles every sketch in arduino/ for an Arduino Nano, so a firmware change that doesn't build
+  # (or no longer fits in flash) fails here instead of when someone flashes it. The core and
+  # library versions are pinned; bump them on purpose.
+  firmware:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: arduino/setup-arduino-cli@v2
+
+      - name: Install the AVR core and U8g2
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:avr@1.8.8
+          arduino-cli lib install U8g2@2.36.19
+
+      - name: Compile the sketches
+        run: |
+          for sketch in arduino/*/; do
+            echo "::group::$sketch"
+            arduino-cli compile --fqbn arduino:avr:nano --warnings default "$sketch"
+            echo "::endgroup::"
+          done
+
   # On a version tag (v1.2.3): publish a GitHub Release with every download.
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
+    needs: [build, firmware]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
