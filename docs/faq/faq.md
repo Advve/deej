@@ -1,88 +1,43 @@
 # deej FAQ
 
-This document tries to cover all of the most commonly asked questions in our [community Discord server](https://discord.gg/nf88NJu), as well as provide basic troubleshooting for frequently-encountered problems by new deej users.
+Common questions about building and setting up deej, with basic troubleshooting. Most of this was written by Omri Harel for the original deej, and it applies to this fork too.
 
-## Important - this is a **work-in-progress**!
-
-![Work in progress](./assets/under-construction.png)
-
-**Please be aware that the current version of this FAQ is still _extremely_ work-in-progress.** It is released publicly in hopes that the questions already answered can be useful to some.
-
-**All questions that have a complete answer have been marked with a "✔" in the table of contents, for your convenience.**
-
-> Please also be aware that I am currently _not accepting_ GitHub contributions in the form of fully submitted answers to the unanswered questions below. You are welcome to submit them (alongside any other feedback) on our community Discord, however!
+Can't find what you're looking for? Try searching this page for a tag, such as _**#comport**_. Tags are listed under each answer.
 
 ## Table of Contents
 
-Use the following list of questions to quickly jump to what you're looking for.
-
-> Can't find what you're looking for? Try searching for terms with a hashtag, such as _**#rotaryencoders**_. These are located near each question for easier finding of alternative keywords.
-
 [**Electronics and hardware**](#electronics-and-hardware)
 
-- **Parts & components**
-  - [Which board should I get?](#which-board-should-i-get)
-  - [What is the difference between sliders and knobs?](#what-is-the-difference-between-sliders-and-knobs) ✔
-  - [Does the resistance of my pots matter? Do they need to be 10K?](#does-the-resistance-of-my-pots-matter-do-they-need-to-be-10k) ✔
-  - [What are rotary encoders and can I use them instead of pots?](#what-are-rotary-encoders-and-can-i-use-them-instead-of-pots?)
-- **Wiring**
-  - [How should I **physically** wire my pots together?](#how-should-i-physically-wire-my-pots-together)
-  - [How should I **logically/electronically** wire my pots together?](#how-should-i-logicallyelectronically-wire-my-pots-together) ✔
-  - [How can I tell which pin is which on my sliders?](#how-can-i-tell-which-pin-is-which-on-my-sliders)
-- **Extra hardware features**
-  - [How do I add mute switches/toggles for each pot?](#how-do-i-add-mute-switchestoggles-for-each-pot)
-  - [How do I add LED indicators?](#how-do-i-add-led-indicators)
-  - [How do I add custom macro buttons?](#how-do-i-add-custom-macro-buttons)
-  - [How do I add a toggle between output devices?](#how-do-i-add-a-toggle-between-output-devices)
-
+- [What is the difference between sliders and knobs?](#what-is-the-difference-between-sliders-and-knobs)
+- [Does the resistance of my pots matter? Do they need to be 10K?](#does-the-resistance-of-my-pots-matter-do-they-need-to-be-10k)
+- [How should I logically/electronically wire my pots together?](#how-should-i-logicallyelectronically-wire-my-pots-together)
 
 [**Arduino**](#arduino)
 
-- [I haven't used Arduino before, where to start?](#i-havent-used-arduino-before-where-to-start) ✔
-- [How can I find my COM/serial port?](#how-can-i-find-my-comserial-port) ✔
-- [How can I upload the deej sketch to my board?](#how-can-i-upload-the-deej-sketch-to-my-board) ✔
-- [How do I know that I uploaded the deej sketch correctly?](#how-do-i-know-that-i-uploaded-the-deej-sketch-correctly) ✔
+- [I haven't used Arduino before, where to start?](#i-havent-used-arduino-before-where-to-start)
+- [How can I find my COM/serial port?](#how-can-i-find-my-comserial-port)
+- [How can I upload the deej sketch to my board?](#how-can-i-upload-the-deej-sketch-to-my-board)
+- [How do I know that I uploaded the deej sketch correctly?](#how-do-i-know-that-i-uploaded-the-deej-sketch-correctly)
 - I'm unable to connect to my board in the Arduino IDE...
-  - [...for the first time ever](#for-the-first-time-ever) ✔
-  - [...after connecting successfully in the past](#after-connecting-successfully-in-the-past) ✔
-- [How do I view the serial monitor?](#how-do-i-view-the-serial-monitor) ✔
+  - [...for the first time ever](#for-the-first-time-ever)
+  - [...after connecting successfully in the past](#after-connecting-successfully-in-the-past)
+- [How do I view the serial monitor?](#how-do-i-view-the-serial-monitor)
 
 [**Running deej for the first time**](#running-deej-for-the-first-time)
 
-- [What should I check before running deej.exe?](#)
-- [I ran deej.exe but nothing happened](#)
-- I ran deej.exe and got an error message...
-  - [...about the config.yaml file](#)
-  - [...about failed connection](#)
-- [I turn my pots but nothing happens](#)
-- [I ran deej.exe and my volume keeps jumping around](#)
-- [My pots only seem to go up to around half volume](#)
-- [All of my pots are inverted!](#all-of-my-pots-are-inverted) ✔
-- [One of my pots is inverted](#one-of-my-pots-is-inverted) ✔
+- [All of my pots are inverted](#all-of-my-pots-are-inverted)
+- [One of my pots is inverted](#one-of-my-pots-is-inverted)
 
 [**Editing the config file (config.yaml)**](#editing-the-config-file-configyaml)
 
-- [How do I open and edit the config.yaml file?](#how-do-i-open-and-edit-the-configyaml-file) ✔
-- [How can I check my config.yaml for errors?](#how-can-i-check-my-configyaml-for-errors) ✔
-- [How do I add an app to the config.yaml file?](#how-do-i-add-an-app-to-the-configyaml-file) ✔
-- [How can I find the .exe name of `insert app here`?](#how-can-i-find-the-exe-name-of-insert-app-here) ✔
-
+- [How do I open and edit the config.yaml file?](#how-do-i-open-and-edit-the-configyaml-file)
+- [How can I check my config.yaml for errors?](#how-can-i-check-my-configyaml-for-errors)
+- [How do I add an app to the config.yaml file?](#how-do-i-add-an-app-to-the-configyaml-file)
+- [How can I find the .exe name of `insert-app-here`?](#how-can-i-find-the-exe-name-of-insert-app-here)
 
 [**Everyday deej usage**](#everyday-deej-usage)
 
-- [Is there a way to make the volume go up/down by less than 3%?](#)
-- [Can I put all my games on one slider without needing to add them one-by-one?](#can-i-put-all-my-games-on-one-slider-without-needing-to-add-them-one-by-one) ✔
-- [The edges of my slider aren't as responsive as the middle](#)
-- [How can I make deej start automatically when my PC boots?](#)
-- [After my computer wakes up from sleep/hibernation deej doesn't work anymore](#)
-- [Sometimes deej randomly stops working (without sleep/hibernation)](#)
-
-[**Component housings and enclosures**](#component-housings-and-enclosures)
-
-- [I don't have a 3D printer, can I still make this project?](#)
-- [I have a 3D printer - where can I find a design to print?](#)
-
-[**[↑]**](#deej-faq)
+- [Can I put all my games on one slider without needing to add them one-by-one?](#can-i-put-all-my-games-on-one-slider-without-needing-to-add-them-one-by-one)
 
 ## Electronics and hardware
 
@@ -128,14 +83,14 @@ There are two main options to wire your pots between one another.
 First off, know that you're in the right place. This project is excellent for a total beginner without any electronics or Arduino knowledge. That being said, you are expected to learn some basics along the way. Here's a general suggestion for how to proceed:
 
 - Watch an introductory video explaining the basics of Arduino, such as [this excellent one](https://www.youtube.com/watch?v=nL34zDTPkcs).
-- Determine what type of deej build you want to go for (3D-printed or not, knobs or sliders, how many of them, etc.), according to your preferences
-  - If this is your first electronics project, I wholeheartedly recommend to keep things simple and not add additional custom functionality. You can always add these later on (or build a second, third and fourth deej!)
-- Get some inspiration from our [community showcase](https://showcase.deej.rocks) and [Thingiverse design collection](https://thingiverse.com/omriharel/collections/deej)
-- Become somewhat familiar with how deej works. A great way to do this is to read the [how it works](https://github.com/omriharel/deej#how-it-works) section in the main README, or to simply read through most of this FAQ :)
+- Determine what type of deej build you want to go for (3D-printed or not, knobs or sliders, how many of them, with or without a screen), according to your preferences
+  - If this is your first electronics project, keep things simple and don't add custom functionality yet. You can always add it later on (or build a second, third and fourth deej!)
+- Get some inspiration from the [community showcase](../../community.md)
+- Become somewhat familiar with how deej works. A great way to do this is to read the [how it works](../../README.md#how-it-works) section in the README, or to simply read through most of this FAQ :)
 - Once you feel like you have a decent grasp over how deej works and what components you need, get shopping!
   - If you're doing things for the first time, it's a good idea to get a spare or two (at least for things like your board and pots) in case you mess something up. It's unlikely, but who wants to wait for a part twice as long?
 - When your parts arrive, take some time to brush up and make sure you understand how you should wire everything together. You can always undo some of it, but taking a brief refresher at this point might save you some time
-- If you run into issues or have additional questions (especially if they're not covered here), join our [community Discord server](https://discord.gg/nf88NJu) and ask away!
+- If you run into a problem with this fork that isn't covered here, open an issue on GitHub
 
 <sub>_Tags: #beginner, #noob, #newbie, #firsttime_</sub>
 
@@ -153,9 +108,9 @@ Another option for Windows users is to open the Device Manager (right-click the 
 
 **Linux users:**
 
-Generally speaking, you'll be able to find your serial port by listing your serial devices with a command such as `ls /dev/ttyUSB*` and choosing the one that makes the most sense. You can also disconnect your device, run the command again and compare both outputs to find the one that's now missing.
+Generally speaking, you'll be able to find your serial port by listing your serial devices with a command such as `ls /dev/ttyUSB* /dev/ttyACM*` and choosing the one that makes the most sense. You can also disconnect your device, run the command again and compare both outputs to find the one that's now missing.
 
-> Please keep in mind that deej's config.yaml file requires you to use the full path, such as `/dev/ttyUSB1`.
+> Please keep in mind that deej's config.yaml file requires you to use the full path, such as `/dev/ttyUSB1`. Your user also needs to be in the `dialout` group to open it.
 
 <sub>_Tags: #comport, #serialport, #devicemanager_</sub>
 
@@ -163,7 +118,9 @@ Generally speaking, you'll be able to find your serial port by listing your seri
 
 ### How can I upload the deej sketch to my board?
 
-- Start by downloading the vanilla deej sketch from [this URL](https://raw.githubusercontent.com/omriharel/deej/master/arduino/deej-5-sliders-vanilla/deej-5-sliders-vanilla.ino), either by right-click → _Save as..._ (save the file with an `.ino` extension), or simply copying and pasting its entire contents into the Arduino IDE (replacing the current open sketch).
+- Open one of the sketches in the Arduino IDE:
+  - [`deej-5-sliders-vanilla`](../../arduino/deej-5-sliders-vanilla/deej-5-sliders-vanilla.ino), the simple one for any board, or
+  - [`deej-5-sliders-oled`](../../arduino/deej-5-sliders-oled), for an Arduino Nano with an OLED screen. Its settings are in `config.h`, and it needs the U8g2 library (_Tools_ → _Manage Libraries_). See [Boards with a screen](../../README.md#boards-with-a-screen).
 - The vanilla sketch is meant for use with 5 potentiometers, wired to analog pins `A0` to `A4`: `A0, A1, A2, A3, A4`. If you have more or less potentiometers, or they're wired to different analog pins on your board, you will need to modify the sketch to reflect those differences. You should do this _before_ uploading it to the board. To do this:
   - Change the number of pots on the first line of the sketch
   - Change the array of pin numbers on the second line of the sketch
@@ -200,8 +157,9 @@ There are several things you want to note here:
 - Try moving your pots! They should behave as explained above, with each one being adjustable between the range of 0 and 1023. If this isn't the case, you might have miswired your potentiometers.
 - Analog values from pots are slightly different between lines, even when the pot isn't being moved. **This is normal!** Since this is an analog signal, it is subject to some noise and interference. deej internally manages that to ensure that volume only changes when you mean to change it.
   - If your analog values are "jumping" by a significantly larger margin than shown here, you may have miswired your potentiometers.
+- The OLED sketch smooths its values and only sends a line when something changes (plus once a second), so its stream is calmer than the screenshot.
 
-If your serial monitor appears to be similar to this, and behaves correctly when you move all of your pots, you're good to go! Close the serial monitor, and proceed to [download and set up](https://github.com/omriharel/deej/releases/latest) deej's desktop client and its config.yaml file.
+If your serial monitor appears to be similar to this, and behaves correctly when you move all of your pots, you're good to go! Close the serial monitor, and [set up deej and its config.yaml file](../../README.md#how-to-run).
 
 <sub>_Tags: #arduino, #arduinoide, #sketch, #flash, #upload, #board, #verify_</sub>
 
@@ -217,7 +175,7 @@ You might be **missing drivers** that correspond to your board. This is of cours
 
 Another common issue with some older Nano-like boards is simply **choosing the wrong processor** in the Arduino IDE, thus not being able to properly communicate with the board (despite setting the correct COM port). In this case, try choosing the **Old Bootloader** option under _Tools_ → _Processor_. You might have to restart your Arduino IDE after.
 
-<sub>_Tags: #connectionissue, #connectionerror, #arduinoide, #accessdenied, #unabletoconnect, #board_</sub>
+<sub>_Tags: #connectionissue, #connectionerror, #arduinoide, #accessdenied, #unabletoconnect, #board, #ch340_</sub>
 
 [**[↑]**](#deej-faq)
 
@@ -239,12 +197,11 @@ Secondly, is anything else running on your machine that might be already connect
 
 First, ensure that no other program (besides Arduino IDE) is connected to the board's serial port. _This includes closing deej, in case it's already running._ Secondly, make sure that you've correctly selected the COM port in the Arduino IDE under _Tools_ → _Port_.
 
-At that point, you should be able to go to _Tools_ → _Serial Monitor_ in the Arduino IDE (or simply use the keyboard shortcut, <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd>). You should now see the serial output from your board!
+At that point, you should be able to go to _Tools_ → _Serial Monitor_ in the Arduino IDE (or simply use the keyboard shortcut, <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd>). Set it to 9600 baud. You should now see the serial output from your board!
 
 <sub>_Tags: #serialmonitor, #arduino, #output, #arduinoide_</sub>
 
 [**[↑]**](#deej-faq)
-
 
 ## Running deej for the first time
 
@@ -316,11 +273,11 @@ To change which app (or apps) are bound to each slider, simply add their process
 
 Other than defining groups of apps, you can use other powerful options in your `slider_mapping`. Most notably:
 
-- `deej.current` will change the volume for the currently active window
+- `deej.current` will change the volume for the currently active window (Windows only)
 - `deej.unmapped` will group together all apps that aren't bound to a slider. This is perfect for a slider to control all your games!
 - `mic` can be used to control the _input_ volume of your microphone.
 
-> You can check out a complete list of configuration file options [here](https://github.com/omriharel/deej#slider-mapping-configuration).
+> You can check out a complete list of configuration file options [here](../../README.md#configuration).
 
 <sub>_Tags: #app, #config, #configuration, #add, #set_</sub>
 
@@ -330,7 +287,7 @@ Other than defining groups of apps, you can use other powerful options in your `
 
 If you're not sure what's the .exe name for the app you wanna add to deej's config.yaml file, you have a few options for how to find it.
 
-**Option 1: Task Manager**
+**Option 1: Task Manager (Windows)**
 
 1. Open Task Manager (Ctrl+Shift+Esc)
 2. Under the "Processes" tab, find the application you care about
@@ -341,9 +298,9 @@ If you're not sure what's the .exe name for the app you wanna add to deej's conf
 
 In some cases, the app you're chasing is playing audio from a secondary process with a different name. This can be harder to find with Task Manager. But there are more ways!
 
-**Option 2: Run deej in debug mode**
+**Option 2: Run deej in debug mode (Windows)**
 
-Keep in mind that this is a bit more complicated. You'll need to start by grabbing the debug executable of deej (`deej-debug.exe`) from the [releases page](https://github.com/omriharel/deej/releases) and downloading it to the same location where your deej.exe and config.yaml are:
+Keep in mind that this is a bit more complicated. You'll need the console version of deej, which prints its logs: build it with `pkg\deej\scripts\windows\build-dev.bat` (see [Building from source](../../README.md#building-from-source)), and put the resulting `deej-dev.exe` in the same folder as your config.yaml:
 
 ![deej-debug.exe](./assets/deej-debug/explorer.png)
 
@@ -355,11 +312,19 @@ Before you continue, make sure to **quit deej if it's already running** in your 
 
 ![quit deej](./assets/deej-debug/quit-deej.png)
 
-At this point, make sure that your desired app is playing some audio, and then type `deej-debug.exe` in the newly opened command prompt and hit Enter. Take a moment to observe the printed logs from deej - you might need to do a bit of scrolling to find what you're looking for. Here's an example screenshot illustrating what to look for:
+At this point, make sure that your desired app is playing some audio, and then type `deej-dev.exe` in the newly opened command prompt and hit Enter. Take a moment to observe the printed logs from deej - you might need to do a bit of scrolling to find what you're looking for. Here's an example screenshot illustrating what to look for (it was taken with the older `deej-debug.exe`, which was the same thing under another name):
 
 ![app sessions](./assets/deej-debug/process-sessions.png)
 
-<sub>_Tags: #app, #exe, #process, #name_</sub>
+**Linux**
+
+On Linux, deej uses the name PulseAudio (or PipeWire) reports as `application.process.binary`. While the app is playing audio, run:
+
+```bash
+pactl list sink-inputs | grep application.process.binary
+```
+
+<sub>_Tags: #app, #exe, #process, #name, #linux_</sub>
 
 [**[↑]**](#deej-faq)
 
@@ -370,9 +335,5 @@ At this point, make sure that your desired app is playing some audio, and then t
 Yes. You can use the `deej.unmapped` option to bind all apps that aren't bound elsewhere in the config.yaml file. This can be used on its own, or together with other binding options on the same slider.
 
 <sub>_Tags: #games, #unmapped, #unbound, #onebyone_</sub>
-
-[**[↑]**](#deej-faq)
-
-## Component housings and enclosures
 
 [**[↑]**](#deej-faq)

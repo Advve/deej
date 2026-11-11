@@ -1,85 +1,83 @@
 # deej
 
-deej is an **open-source hardware volume mixer** for Windows and Linux PCs. It lets you use real-life sliders (like a DJ!) to **seamlessly control the volumes of different apps** (such as your music player, the game you're playing and your voice chat session) without having to stop what you're doing.
+deej is an **open-source hardware volume mixer** for Windows and Linux PCs. Turn real knobs or sliders to **control the volume of individual apps** (your music player, the game you're playing, your voice chat) without leaving what you're doing.
 
-**Join the [deej Discord server](https://discord.gg/nf88NJu) if you need help or have any questions!**
+It has two parts: a small desktop app written in Go, and an Arduino board with a few potentiometers that's cheap and simple to build.
 
-[![Discord](https://img.shields.io/discord/702940502038937667?logo=discord)](https://discord.gg/nf88NJu)
-
-> **_New:_** [work-in-progress deej FAQ](./docs/faq/faq.md)!
-
-deej consists of a [lightweight desktop client](#features) written in Go, and an Arduino-based hardware setup that's simple and cheap to build. [**Check out some versions built by members of our community!**](./community.md)
-
-**[Download the latest release](https://github.com/omriharel/deej/releases/latest) | [Video demonstration](https://youtu.be/VoByJ4USMr8) | [Build video by Tech Always](https://youtu.be/x2yXbFiiAeI)**
+> **This is a maintained fork of [omriharel/deej](https://github.com/omriharel/deej)**, created by [Omri Harel](https://github.com/omriharel). The original hasn't been updated since 2021 (last release v0.9.10, August 2020). This fork keeps it working with current hardware and drivers and adds support for boards with a screen. See [What's new in this fork](#whats-new-in-this-fork).
 
 ![deej](assets/build-3d-annotated.png)
 
-> _**Psst!** [No 3D printer? No problem!](./assets/build-shoebox.jpg)_ You can build deej on some cardboard, a shoebox or even a breadboard :)
+> _No 3D printer? [No problem](./assets/build-shoebox.jpg)._ deej works just as well built into cardboard, a shoebox or on a breadboard.
 
 ## Table of contents
 
+- [What's new in this fork](#whats-new-in-this-fork)
 - [Features](#features)
 - [How it works](#how-it-works)
-  - [Hardware](#hardware)
-    - [Schematic](#schematic)
-  - [Software](#software)
-- [Slider mapping (configuration)](#slider-mapping-configuration)
-- [Build your own!](#build-your-own)
-  - [FAQ](#faq)
-  - [Build video](#build-video)
-  - [Bill of Materials](#bill-of-materials)
-  - [Thingiverse collection](#thingiverse-collection)
-  - [Build procedure](#build-procedure)
+- [Configuration](#configuration)
+- [Boards with a screen](#boards-with-a-screen)
+- [Build your own](#build-your-own)
 - [How to run](#how-to-run)
-  - [Requirements](#requirements)
-  - [Download and installation](#download-and-installation)
-  - [Building from source](#building-from-source)
-- [Community](#community)
+- [Building from source](#building-from-source)
+- [Troubleshooting](#troubleshooting)
+- [Credits](#credits)
 - [License](#license)
+
+## What's new in this fork
+
+- **Works with current CH340 drivers on Windows.** Many Arduino Nano clones use a CH340 USB chip. Since driver version 3.8 (2023), Windows returns empty reads from it, and the original deej connects but never reads a single slider value. This fork waits those out, so deej works on both old and new drivers.
+- **Support for boards with a screen.** deej now tells the board what each slider controls: a label, an icon, whether the current OS can drive it, and whether its app is running. It also sends a keepalive, so the board can tell when deej isn't running. See [Boards with a screen](#boards-with-a-screen).
+- **[`deej-5-sliders-oled`](./arduino/deej-5-sliders-oled) firmware** for an Arduino Nano with 5 knobs and a 1.3" OLED, which shows all of that.
+- **Two new optional config keys,** `slider_labels` and `slider_icons`, to choose what the screen shows.
+- **Fewer session glitches.** Refreshing the list of audio sessions can no longer happen at the same moment a slider is using them.
+
+Everything stays compatible:
+
+- Existing `config.yaml` files work unchanged. The original deej ignores the new keys, so one file works with both.
+- The [original firmware](./arduino/deej-5-sliders-vanilla/deej-5-sliders-vanilla.ino) works with this deej. It ignores what deej sends.
+- The OLED firmware works with the original deej. It just shows the labels from its own `config.h`.
 
 ## Features
 
-deej is written in Go and [distributed](https://github.com/omriharel/deej/releases/latest) as a portable (no installer needed) executable.
-
-- Bind apps to different sliders
-  - Bind multiple apps per slider (i.e. one slider for all your games)
-  - Bind the master channel
-  - Bind "system sounds" (on Windows)
-  - Bind specific audio devices by name (on Windows)
-  - Bind currently active app (on Windows)
-  - Bind all other unassigned apps
-- Control your microphone's input level
-- Lightweight desktop client, consuming around 10MB of memory
-- Runs from your system tray
-- Helpful notifications to let you know if something isn't working
-
-> **Looking for the older Python version?** It's no longer maintained, but you can always find it in the [`legacy-python` branch](https://github.com/omriharel/deej/tree/legacy-python).
+- Bind apps to sliders
+  - Several apps on one slider (for example, all your games)
+  - The master volume
+  - Your microphone's input level
+  - All apps that aren't bound to any other slider
+  - The app in focus (Windows only)
+  - "System sounds" (Windows only)
+  - A specific audio device, by name (Windows only)
+- Edit the config while deej is running: it reloads automatically
+- Show labels, icons and app status on a board with a screen
+- Runs from the system tray, uses around 10 MB of memory
+- Notifications when something's wrong (wrong COM port, broken config)
 
 ## How it works
 
 ### Hardware
 
-- The sliders are connected to 5 (or as many as you like) analog pins on an Arduino Nano/Uno board. They're powered from the board's 5V output (see schematic)
-- The board connects via a USB cable to the PC
-
-#### Schematic
+- The sliders or knobs are wired to the analog pins of an Arduino Nano, Pro Micro or Uno, and powered from the board's 5V pin.
+- The board connects to the PC over USB.
 
 ![Hardware schematic](assets/schematic.png)
 
 ### Software
 
-- The code running on the Arduino board is a [C program](./arduino/deej-5-sliders-vanilla/deej-5-sliders-vanilla.ino) constantly writing current slider values over its serial interface
-- The PC runs a lightweight [Go client](./pkg/deej/cmd/main.go) in the background. This client reads the serial stream and adjusts app volumes according to the given configuration file
+- The firmware on the board reads the sliders and keeps sending their values over USB serial, one line at a time: `512|1023|0|300|800`, each from 0 to 1023.
+- The deej app runs in the background on the PC. It reads those lines and sets each app's volume according to `config.yaml`.
+- With a screen, deej also sends a few short lines back to the board (see [Boards with a screen](#boards-with-a-screen)).
 
-## Slider mapping (configuration)
+Two firmwares are included:
 
-deej uses a simple YAML-formatted configuration file named [`config.yaml`](./config.yaml), placed alongside the deej executable.
+| Firmware | Hardware | What it does |
+|---|---|---|
+| [`deej-5-sliders-vanilla`](./arduino/deej-5-sliders-vanilla/deej-5-sliders-vanilla.ino) | Any board, 5 sliders on A0–A4 | Sends slider values. The original firmware, unchanged. |
+| [`deej-5-sliders-oled`](./arduino/deej-5-sliders-oled) | Arduino Nano, 5 knobs, SH1106 or SSD1306 I2C OLED | Smoothed knob values, plus a screen with levels, labels and app status. |
 
-The config file determines which applications (and devices) are mapped to which sliders, and which parameters to use for the connection to the Arduino board, as well as other user preferences.
+## Configuration
 
-**This file auto-reloads when its contents are changed, so you can change application mappings on-the-fly without restarting deej.**
-
-It looks like this:
+deej reads `config.yaml` from the folder it runs in. Changes are picked up as soon as you save the file, with no restart needed.
 
 ```yaml
 slider_mapping:
@@ -103,110 +101,141 @@ baud_rate: 9600
 noise_reduction: default
 ```
 
-- `master` is a special option to control the master volume of the system _(uses the default playback device)_
-- `mic` is a special option to control your microphone's input level _(uses the default recording device)_
-- `deej.unmapped` is a special option to control all apps that aren't bound to any slider ("everything else")
-- On Windows, `deej.current` is a special option to control whichever app is currently in focus
-- On Windows, you can specify a device's full name, i.e. `Speakers (Realtek High Definition Audio)`, to bind that device's level to a slider. This doesn't conflict with the default `master` and `mic` options, and works for both input and output devices.
-  - Be sure to use the full device name, as seen in the menu that comes up when left-clicking the speaker icon in the tray menu
-- `system` is a special option on Windows to control the "System sounds" volume in the Windows mixer
-- All names are case-**in**sensitive, meaning both `chrome.exe` and `CHROME.exe` will work
-- You can create groups of process names (using a list) to either:
-    - control more than one app with a single slider
-    - choose whichever process in the group that's currently running (i.e. to have one slider control any game you're playing)
+Slider numbers start at 0, whichever analog pins you use. What you can put in `slider_mapping`:
 
-## Build your own!
+| Target | Controls |
+|---|---|
+| `chrome.exe`, `spotify`, … | That app (case doesn't matter; on Linux, use the name without `.exe`) |
+| a list of apps | All of them, or whichever of them is running |
+| `master` | The default playback device |
+| `mic` | The default recording device's input level |
+| `deej.unmapped` | Every app not bound to another slider |
+| `deej.current` | The app in focus (Windows only) |
+| `system` | "System sounds" in the Windows mixer (Windows only) |
+| `Speakers (Realtek High Definition Audio)` | That device, by its full name as shown in the Windows volume menu. Works for inputs and outputs (Windows only) |
 
-Building deej is very simple. You only need a few relatively cheap parts - it's an excellent starter project (and my first Arduino project, personally). Remember that if you need any help or have a question that's not answered here, you can always [join the deej Discord server](https://discord.gg/nf88NJu).
+On Linux, `com_port` is usually `/dev/ttyUSB0` (CH340 boards) or `/dev/ttyACM0`.
 
-Build deej for yourself, or as an awesome gift for your gaming buddies!
+### Screen labels and icons (optional)
 
-### FAQ
+For boards with a screen, deej works out a label and an icon for each slider from `slider_mapping`:
 
-I've started a highly focused effort of writing a proper FAQ page for deej, covering many basic and advanced topics.
+- `master` → MASTER, `mic` → MIC, `deej.current` → ACTIVE, `deej.unmapped` → OTHER
+- `spotify.exe` → SPOTIFY. The `.exe` is dropped and the name is uppercased.
+- A group of the same kind of app → BROWSER, MUSIC, VOICE, CHAT, VIDEO or GAMES. A mixed group → first app's name with a `+`.
+- Known browsers, music players, voice and chat apps, video players and game launchers get a matching icon. Other apps get a window icon.
 
-It is still _very much a work-in-progress_, but I'm happy to [share it in its current state](./docs/faq/faq.md) in hopes that it at least covers some questions you might have.
+To pick your own, add either key and list only the sliders you want to change:
 
-FAQ feedback in our [community Discord](https://discord.gg/nf88NJu) is strongly encouraged :)
+```yaml
+slider_labels:
+  3: GAMES
+slider_icons:
+  3: game
+```
 
-### Build video
+Labels are cut to 10 characters. Icons: `speaker`, `music`, `globe`, `headset`, `window`, `mic`, `muted`, `game`, `chat`, `video`, `micoff`.
 
-In case you prefer watching to reading, Charles from the [**Tech Always**](https://www.youtube.com/c/TechAlways) YouTube channel has made [**a fantastic video**](https://youtu.be/x2yXbFiiAeI) that covers the basics of building deej for yourself, including parts, costs, assembly and software. I highly recommend checking it out!
+## Boards with a screen
 
-### Bill of Materials
+![OLED firmware icons](arduino/deej-5-sliders-oled/tools/icons_preview.png)
 
-- An Arduino Nano, Pro Micro or Uno board
-  - I officially recommend using a Nano or a Pro Micro for their smaller form-factor, friendlier USB connectors and more analog pins. Plus they're cheaper
-  - You can also use any other development board that has a Serial over USB interface
-- A few slider potentiometers, up to your number of free analog pins (the cheaper ones cost around 1-2 USD each, and come with a standard 10K Ohm variable resistor. These _should_ work just fine for this project)
-  - **Important:** make sure to get **linear** sliders, not logarithmic ones! Check the product description
-  - You can also use circular knobs if you like
-- Some wires
-- Any kind of box to hold everything together. **You don't need a 3D printer for this project!** It works fantastically with just a piece of cardboard or a shoebox. That being said, if you do have one, read on...
+The [`deej-5-sliders-oled`](./arduino/deej-5-sliders-oled) firmware drives a 1.3" SH1106 (or 0.96" SSD1306) I2C OLED on an Arduino Nano, mounted portrait next to 5 knobs. It shows:
 
-### Thingiverse collection
+- **Overview:** one bar per knob with its icon and level.
+  - A **dotted bar with `NA`**: this OS can't drive that slider, for example `deej.current` on Linux.
+  - A **hatched bar**: the slider's app isn't running.
+  - **`--`**: the slider isn't mapped.
+- **Focus view:** the knob you're turning, shown big with its name and level.
+- **"NO DEEJ"** and an X in the corner when deej isn't running.
+- A dimmed, moving screensaver after 5 seconds, then the screen turns off.
 
-With many different 3D-printed designs being added to our [community showcase](./community.md), it felt right to gather all of them in a Thingiverse collection for you to browse. If you have access to a 3D printer, feel free to use one of the designs in your build.
+What deej sent last is saved in the board's EEPROM, so labels are there even before deej starts. Only changed bytes are written, so the EEPROM won't wear out.
 
-**[Visit our community-created design collection on Thingiverse!](https://thingiverse.com/omriharel/collections/deej)**
+**Setup**
 
-> You can also [submit your own](https://discord.gg/nf88NJu) design to be added to the collection. Regardless, if you do upload your design to Thingiverse, _please add a `deej` tag to it so that others can find it more easily_.
+1. Install the **U8g2** library in the Arduino IDE (Tools → Manage Libraries).
+2. Open [`config.h`](./arduino/deej-5-sliders-oled/config.h) and set your knob pins (`KNOB_PINS`, in slider order), screen type and rotation. The OLED uses A4 (SDA) and A5 (SCL).
+3. Upload to the Nano.
+   - Board: "Arduino Nano".
+   - Processor: "ATmega328P", or "ATmega328P (Old Bootloader)" if the upload fails.
+4. Set `com_port` in `config.yaml` and start deej.
 
+With the original deej, set `SHOW_LINK_STATUS = false` in `config.h`. The original never sends the keepalive, so the screen would always say "NO DEEJ".
 
-### Build procedure
+**Changing the icons:** they're drawn as text art in [`tools/gen_icons.go`](./arduino/deej-5-sliders-oled/tools/gen_icons.go). Edit the art and run `go run gen_icons.go` in that folder. It rewrites `icons.h` and the preview image. A new icon also needs its name in `ICON_NAMES` in the sketch and in `displayIcons` in [`pkg/deej/display.go`](./pkg/deej/display.go).
 
-- Connect everything according to the [schematic](#schematic)
-- Test with a multimeter to be sure your sliders are hooked up correctly
-- Flash the Arduino chip with the sketch in [`arduino\deej-5-sliders-vanilla`](./arduino/deej-5-sliders-vanilla/deej-5-sliders-vanilla.ino)
-  - _Important:_ If you have more or less than 5 sliders, you must edit the sketch to match what you have
-- After flashing, check the serial monitor. You should see a constant stream of values separated by a pipe (`|`) character, e.g. `0|240|1023|0|483`
-  - When you move a slider, its corresponding value should move between 0 and 1023
-- Congratulations, you're now ready to run the deej executable!
+**Protocol:** the lines deej sends are documented at the top of [`pkg/deej/display.go`](./pkg/deej/display.go). Any firmware can read them, and they never look like slider values.
+
+## Build your own
+
+### Parts
+
+- An Arduino Nano, Pro Micro or Uno (or any board with USB serial). The Nano and Pro Micro are smaller and cheaper.
+- Slider or rotary potentiometers, as many as you have free analog pins. Cheap 10K ones work fine. Make sure they're **linear**, not logarithmic.
+- Wires.
+- Optional: a 1.3" SH1106 or 0.96" SSD1306 I2C OLED, for the [screen firmware](#boards-with-a-screen).
+- A box: 3D-printed, cardboard, anything.
+
+Looking for ideas? See builds by the original deej community in the [community showcase](./community.md), many with enclosure designs. Tech Always also made a [build video](https://youtu.be/x2yXbFiiAeI) covering parts, assembly and software.
+
+### Assembly
+
+1. Wire everything according to the [schematic](#hardware). Check your pots with a multimeter.
+2. Flash one of the [firmwares](#software). With the vanilla one, edit the sketch if you don't have exactly 5 sliders.
+3. Open the Arduino serial monitor at 9600 baud. You should see lines like `0|240|1023|0|483`, and each number should go from 0 to 1023 as you move its slider.
+4. Close the serial monitor, since only one program can use the port, and run deej.
+
+The [FAQ](./docs/faq/faq.md) covers wiring, uploading, finding your COM port and editing the config in more detail.
 
 ## How to run
 
-### Requirements
+This fork doesn't publish releases yet. [Build deej from source](#building-from-source). On GitHub, every push to `master` also builds it, and you can download the result from the repository's **Actions** tab when signed in.
 
-#### Windows
+### Windows
 
-- Windows. That's it
+1. Put `deej.exe` and `config.yaml` in the same folder.
+2. Set `com_port` to your board's port. Device Manager → Ports (COM & LPT) shows it.
+3. Run `deej.exe`. It appears in the system tray.
+4. Optional: to start deej with Windows, put a shortcut to it in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`.
 
-#### Linux
+### Linux
 
-- Install `libgtk-3-dev`, `libappindicator3-dev` and `libwebkit2gtk-4.0-dev` for system tray support. Pre-built Linux binaries aren't currently released, so you'll need to [build from source](#building-from-source). If there's demand for pre-built binaries, please [let me know](https://discord.gg/nf88NJu)!
+1. Build deej (see below) and put `config.yaml` next to it.
+2. Set `com_port`, usually `/dev/ttyUSB0`.
+3. Make sure your user can open serial ports: `sudo usermod -aG dialout $USER`, then log out and back in.
+4. Use Linux app names in `slider_mapping` (`spotify`, not `spotify.exe`).
 
-### Download and installation
+## Building from source
 
-- Head over to the [releases page](https://github.com/omriharel/deej/releases) and download the [latest version](https://github.com/omriharel/deej/releases/latest)'s executable and configuration file (`deej.exe` and `config.yaml`)
-- Place them in the same directory anywhere on your machine
-- (Optional, on Windows) Create a shortcut to `deej.exe` and copy it to `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` to have deej run on boot
+You need Go 1.14 or newer (1.22 is known to work).
 
-### Building from source
+- **Windows:** run `pkg\deej\scripts\windows\build-release.bat`. It writes `deej-release.exe` in the repository root.
+- **Linux:** run `pkg/deej/scripts/linux/build-release.sh` from the repository root. It writes `deej-release`.
 
-If you'd rather not download a compiled executable, or want to extend deej or modify it to your needs, feel free to clone the repository and build it yourself. All you need is a Go 1.14 (or above) environment on your machine. If you go this route, make sure to check out the [developer scripts](./pkg/deej/scripts).
+The Linux build needs the development files for GTK 3, WebKit2GTK 4.0 and AppIndicator 3 (pkg-config names `gtk+-3.0`, `webkit2gtk-4.0`, `appindicator3-0.1`). On Ubuntu 22.04:
 
-Like other Go packages, you can also use the `go get` tool: `go get -u github.com/omriharel/deej`. Please note that the package code now resides in the `pkg/deej` directory, and needs to be imported from there if used inside another project.
+```bash
+sudo apt install libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev
+```
 
-If you need any help with this, please [join our Discord server](https://discord.gg/nf88NJu).
+Newer distributions (Ubuntu 24.04 and later) no longer ship WebKit2GTK 4.0 or the original AppIndicator, so deej can't be built there yet. This comes from the system tray library deej uses.
 
-## Community
+`build-dev.bat` / `build-dev.sh` build a console version that shows logs. `deej -v` turns on verbose logging, which shows every line read from the board.
 
-[![Discord](https://img.shields.io/discord/702940502038937667?logo=discord)](https://discord.gg/nf88NJu)
+## Troubleshooting
 
-deej is a relatively new project, but a vibrant and awesome community is rapidly growing around it. Come hang out with us in the [deej Discord server](https://discord.gg/nf88NJu), or check out a whole bunch of cool and creative builds made by our members in the [community showcase](./community.md).
+- **"Can't connect to COMx"**: the port in `config.yaml` is wrong, or the board isn't plugged in. The port can change when you use a different USB socket.
+- **deej connects but nothing happens when you move a slider**: check the board in the Arduino serial monitor first. With the original deej and a CH340 board, it can also be the driver problem this fork fixes.
+- **"This serial port is busy"**: close the Arduino serial monitor, or any other program using the port.
+- deej writes a log to `logs/deej-latest-run.log` next to the executable.
 
-The server is also a great place to ask questions, suggest features or report bugs (but of course, feel free to use GitHub if you prefer).
+## Credits
 
-### Donations
-
-If you love deej and want to show your support for this project, you can do so using the link below. Please don't feel obligated to donate - building the project and telling your friends about it goes a very long way! Thank you very much.
-
-[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/omriharel)
-
-### Contributing
-
-Please see [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md).
+- deej was created by **[Omri Harel](https://github.com/omriharel)**: the original [omriharel/deej](https://github.com/omriharel/deej). If you'd like to thank him, he has a [Ko-fi page](https://ko-fi.com/omriharel).
+- The original deej community is still on [Discord](https://discord.gg/nf88NJu). It's about the original deej, not this fork, so report this fork's problems here on GitHub.
+- The community builds in [community.md](./community.md) are by their respective makers.
 
 ## License
 
-deej is released under the [MIT license](./LICENSE).
+MIT, like the original. See [LICENSE](./LICENSE).

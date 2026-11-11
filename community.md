@@ -1,10 +1,6 @@
 # Community showcase
 
-This is a showcase of `deej` versions built by people around the world. Many of those who featured their builds here regularly hang around in [our Discord server](https://discord.gg/nf88NJu), so you can ask them any questions you might have.
-
-We've also gathered many of the community-created 3D designs featured here in a [Thingiverse collection](https://thingiverse.com/omriharel/collections/deej) for your viewing pleasure. Feel free to use them for your own builds if you have access to a 3D printer.
-
-If you built yourself one of these things, I'd love to [add yours](https://discord.gg/nf88NJu)!
+These `deej` builds were made by people around the world for the original deej, and collected by its author, Omri Harel. They work the same way with this fork. Many come with a 3D-printable enclosure you can use for your own build. Many of the makers were active in the original deej [Discord server](https://discord.gg/nf88NJu).
 
 ## [/u/Aithorn](https://reddit.com/user/Aithorn)
 
@@ -72,7 +68,7 @@ This PCB build also takes advantage of sandwiching between two identical custom 
 
 ## [Daggr](https://www.thingiverse.com/daggr)
 
-**Links**: [Imgur album](https://imgur.com/a/YmTALay) | [Enclosure model on Thingiverse](https://www.thingiverse.com/thing:4555424) | [Blog post](https://blogg.spofify.se/index.php/2020/07/28/physical-volume-controller-part-2/)
+**Links**: [Imgur album](https://imgur.com/a/YmTALay) | [Enclosure model on Thingiverse](https://www.thingiverse.com/thing:4555424)
 
 This design is a remixed version of the above build by [nightfox939](#nightfox939), this time using five circular knobs instead of sliders. It adds onto it with a patterned top infill in the slicer settings, as well as some sharp looking filament-swapped app icons.
 
