@@ -1,5 +1,13 @@
 # deej
 
+<p>
+  <a href="https://github.com/Advve/deej/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/Advve/deej/build.yml?branch=master&label=build" alt="Build status"></a>
+  <a href="https://github.com/Advve/deej/releases/latest"><img src="https://img.shields.io/github/v/release/Advve/deej?label=version" alt="Version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/Advve/deej?color=blue" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux-1d2230" alt="Platforms: Windows, Linux">
+  <img src="https://img.shields.io/badge/Go-1.22-00ADD8?logo=go&logoColor=white" alt="Go 1.22">
+</p>
+
 deej is an **open-source hardware volume mixer** for Windows and Linux PCs. Turn real knobs or sliders to **control the volume of individual apps** (your music player, the game you're playing, your voice chat) without leaving what you're doing.
 
 It has two parts: a small desktop app written in Go, and an Arduino board with a few potentiometers that's cheap and simple to build.
@@ -22,6 +30,7 @@ It has two parts: a small desktop app written in Go, and an Arduino board with a
 - [Building from source](#building-from-source)
 - [Troubleshooting](#troubleshooting)
 - [Credits](#credits)
+- [Changelog](#changelog)
 - [License](#license)
 
 ## What's new in this fork
@@ -191,34 +200,35 @@ The [FAQ](./docs/faq/faq.md) covers wiring, uploading, finding your COM port and
 
 ## How to run
 
-This fork doesn't publish releases yet. [Build deej from source](#building-from-source). On GitHub, every push to `master` also builds it, and you can download the result from the repository's **Actions** tab when signed in.
+Download deej from the [latest release](https://github.com/Advve/deej/releases/latest): `deej.exe` for Windows, `deej-linux-amd64` or `deej-linux-arm64` for Linux, and `config.yaml`. Each is a single file with nothing to install. You can also [build it yourself](#building-from-source).
 
 ### Windows
 
-1. Put `deej.exe` and `config.yaml` in the same folder.
+1. Put `deej.exe` and `config.yaml` in the same folder. deej isn't code-signed, so SmartScreen may warn the first time: **More info → Run anyway**.
 2. Set `com_port` to your board's port. Device Manager → Ports (COM & LPT) shows it.
 3. Run `deej.exe`. It appears in the system tray.
 4. Optional: to start deej with Windows, put a shortcut to it in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`.
 
 ### Linux
 
-1. Build deej (see below) and put `config.yaml` next to it.
+1. Put `deej-linux-amd64` (or `-arm64`) and `config.yaml` in the same folder, and make the program executable: `chmod +x deej-linux-amd64`.
 2. Set `com_port`, usually `/dev/ttyUSB0`.
 3. Make sure your user can open serial ports: `sudo usermod -aG dialout $USER`, then log out and back in.
 4. Use Linux app names in `slider_mapping` (`spotify`, not `spotify.exe`).
 
-The tray icon uses the StatusNotifierItem (AppIndicator) standard. KDE Plasma, Xfce, Cinnamon, MATE, Budgie and most other desktops show it. GNOME needs the "AppIndicator and KStatusNotifierItem Support" extension, which Ubuntu enables by default. Without a tray, deej still works but has no icon. Stop it with `pkill deej-release` (or whatever you named the file). "Edit configuration" in the tray menu opens `config.yaml` in your default text editor.
+The tray icon uses the StatusNotifierItem (AppIndicator) standard. KDE Plasma, Xfce, Cinnamon, MATE, Budgie and most other desktops show it. GNOME needs the "AppIndicator and KStatusNotifierItem Support" extension, which Ubuntu enables by default. Without a tray, deej still works but has no icon. Stop it with `pkill deej-linux` (or whatever you named the file). "Edit configuration" in the tray menu opens `config.yaml` in your default text editor.
 
 ## Building from source
 
-You need Go 1.19 or newer (1.22 is known to work).
+You need Go 1.22 or newer. deej is pure Go: no C compiler or system libraries, and any OS can build for the others.
 
 - **Windows:** run `pkg\deej\scripts\windows\build-release.bat`. It writes `deej-release.exe` in the repository root.
-- **Linux:** run `pkg/deej/scripts/linux/build-release.sh` from the repository root. It writes `deej-release`.
+- **Linux:** run `pkg/deej/scripts/linux/build-release.sh` from the repository root. It writes `deej-release`, a static binary that runs on any distribution.
+- **Anything else:** `GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "-X main.buildType=release" ./pkg/deej/cmd`. This is the same command the CI uses. Set `GOOS`/`GOARCH` for the target and add `-H=windowsgui` to the flags for Windows.
 
-The Linux build needs no system packages. It's pure Go and produces a static binary that runs on any distribution, so you can also build it on Windows or macOS: `GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build ./pkg/deej/cmd` (or `GOARCH=arm64` for a Raspberry Pi).
+`build-dev.bat` / `build-dev.sh` build a console version that shows logs. `deej -v` turns on verbose logging, which shows every line read from the board, and `deej -version` prints the version.
 
-`build-dev.bat` / `build-dev.sh` build a console version that shows logs. `deej -v` turns on verbose logging, which shows every line read from the board.
+Releases are built by GitHub Actions; see [Releasing](./docs/CONTRIBUTING.md#releasing).
 
 ## Troubleshooting
 
@@ -233,6 +243,20 @@ The Linux build needs no system packages. It's pure Go and produces a static bin
 - The original deej community is still on [Discord](https://discord.gg/nf88NJu). It's about the original deej, not this fork, so report this fork's problems here on GitHub.
 - The community builds in [community.md](./community.md) are by their respective makers.
 
+## Changelog
+
+- **1.0.0** (first release of this fork), based on deej 0.9.10 by Omri Harel
+  - Works with CH340 USB drivers 3.8 and newer on Windows, which the original reads nothing from
+  - Builds and runs on current Linux distributions: pure Go, no GTK, WebKit or AppIndicator
+    libraries needed, and Linux ARM64 builds
+  - Sends each slider's label, icon, OS support and running app, plus a keepalive, to boards with
+    a screen; new optional `slider_labels` and `slider_icons` config keys
+  - New `deej-5-sliders-oled` firmware for an Arduino Nano with a 1.3" or 0.96" OLED
+  - Session refreshes no longer collide with slider moves; Ctrl+C and SIGTERM are always caught;
+    "Edit configuration" opens the desktop's default editor on Linux
+  - `-version` flag, version information in the .exe, and third-party license notices with every release
+  - Needs Go 1.22 to build
+
 ## License
 
-MIT, like the original. See [LICENSE](./LICENSE).
+MIT, like the original. See [LICENSE](./LICENSE). [`THIRD-PARTY-NOTICES.txt`](./THIRD-PARTY-NOTICES.txt) lists the licenses of the libraries deej is built with.

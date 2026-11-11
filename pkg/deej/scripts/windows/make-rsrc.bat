@@ -1,24 +1,9 @@
 @ECHO OFF
 
-IF "%GOPATH%"=="" GOTO NOGO
-IF NOT EXIST %GOPATH%\bin\rsrc.exe GOTO INSTALL
-:POSTINSTALL
-ECHO Creating pkg/deej/cmd/rsrc.syso
-%GOPATH%\bin\rsrc -manifest pkg\deej\assets\deej.manifest  -ico pkg\deej\assets\logo.ico -o pkg\deej\cmd\rsrc_windows.syso
-GOTO DONE
+REM Rewrites pkg\deej\cmd\rsrc_windows_amd64.syso (icon, manifest and version info for deej.exe)
+REM from winres\winres.json, using go-winres. Run it from the repository root.
 
-:INSTALL
-ECHO Installing rsrc...
-go get  github.com/akavel/rsrc
-IF ERRORLEVEL 1 GOTO GETFAIL
-GOTO POSTINSTALL
-
-:GETFAIL
-ECHO Failure running go get  github.com/akavel/rsrc.  Ensure that go and git are in PATH
-GOTO DONE
-
-:NOGO
-ECHO GOPATH environment variable not set
-GOTO DONE
-
-:DONE
+ECHO Generating Windows resources...
+go generate ./pkg/deej/cmd
+IF %ERRORLEVEL% NEQ 0 EXIT /B 1
+ECHO Done.

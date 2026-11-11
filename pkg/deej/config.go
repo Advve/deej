@@ -31,7 +31,7 @@ type CanonicalConfig struct {
 	SliderLabels map[int]string
 	SliderIcons  map[int]string
 
-	logger            *zap.SugaredLogger
+	logger             *zap.SugaredLogger
 	notifier           Notifier
 	stopWatcherChannel chan bool
 
