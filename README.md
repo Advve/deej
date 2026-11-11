@@ -249,7 +249,7 @@ Releases are built by GitHub Actions; see [Releasing](./docs/CONTRIBUTING.md#rel
 
 ## Changelog
 
-- **1.0.0** (first release of this fork), based on deej 0.9.10 by Omri Harel
+- **0.1.0** (first release of this fork), based on deej 0.9.10 by Omri Harel
   - Works with CH340 USB drivers 3.8 and newer on Windows, which the original reads nothing from
   - Builds and runs on current Linux distributions: pure Go, no GTK, WebKit or AppIndicator
     libraries needed, and Linux ARM64 builds
