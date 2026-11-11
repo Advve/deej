@@ -154,6 +154,10 @@ Labels are cut to 10 characters. Icons: `speaker`, `music`, `globe`, `headset`, 
 
 ## Boards with a screen
 
+[![The deej OLED volume mixer: 5 knobs and a 1.3" screen in a 3D-printed case, on its 30° stand](docs/oled-build.jpg)](https://makerworld.com/en/models/3590850-deej-oled-volume-mixer-5-knob-arduino-nano-case)
+
+> **Print this build:** the case, the 30° stand and ready-to-print profiles are on [MakerWorld](https://makerworld.com/en/models/3590850-deej-oled-volume-mixer-5-knob-arduino-nano-case), together with a parts list and an assembly guide PDF.
+
 ![OLED firmware icons](arduino/deej-5-sliders-oled/tools/icons_preview.png)
 
 The [`deej-5-sliders-oled`](./arduino/deej-5-sliders-oled) firmware drives a 1.3" SH1106 (or 0.96" SSD1306) I2C OLED on an Arduino Nano, mounted portrait next to 5 knobs. It shows:
@@ -193,7 +197,7 @@ With the original deej, set `SHOW_LINK_STATUS = false` in `config.h`. The origin
 - Optional: a 1.3" SH1106 or 0.96" SSD1306 I2C OLED, for the [screen firmware](#boards-with-a-screen).
 - A box: 3D-printed, cardboard, anything.
 
-Looking for ideas? See builds by the original deej community in the [community showcase](./community.md), many with enclosure designs. Tech Always also made a [build video](https://youtu.be/x2yXbFiiAeI) covering parts, assembly and software.
+The case in the photo above, with its stand and print profiles, is on [MakerWorld](https://makerworld.com/en/models/3590850-deej-oled-volume-mixer-5-knob-arduino-nano-case). Looking for other ideas? See builds by the original deej community in the [community showcase](./community.md), many with enclosure designs. Tech Always also made a [build video](https://youtu.be/x2yXbFiiAeI) covering parts, assembly and software.
 
 ### Assembly
 
