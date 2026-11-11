@@ -283,6 +283,14 @@ func (sio *SerialIO) writeDisplayLines(logger *zap.SugaredLogger, lines []string
 	for _, line := range lines {
 		if _, err := sio.conn.Write([]byte(line + "\n")); err != nil {
 			logger.Warnw("Failed to send display info", "error", err)
+
+			// a failed write usually means the board was unplugged: let the connection loop reconnect
+			if sio.connLost != nil {
+				select {
+				case sio.connLost <- fmt.Errorf("writing to the port failed: %w", err):
+				default:
+				}
+			}
 			return false
 		}
 

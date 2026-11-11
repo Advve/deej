@@ -156,15 +156,20 @@ func (d *Deej) run() {
 
 				d.signalStop()
 
-				// also notify if the COM port they gave isn't found, maybe their config is wrong
+				// if the port isn't there, the board is probably just unplugged (or the config is wrong):
+				// say so once, then keep waiting for it rather than quitting
 			} else if errors.Is(err, os.ErrNotExist) {
-				d.logger.Warnw("Provided COM port seems wrong, notifying user and closing",
+				d.logger.Warnw("Provided COM port doesn't exist (yet), notifying user and waiting for it",
 					"comPort", d.config.ConnectionInfo.COMPort)
 
-				d.notifier.Notify(fmt.Sprintf("Can't connect to %s!", d.config.ConnectionInfo.COMPort),
-					"This serial port doesn't exist, check your configuration and make sure it's set correctly.")
+				d.notifier.Notify(fmt.Sprintf("Waiting for %s", d.config.ConnectionInfo.COMPort),
+					"deej will connect when the board is plugged in. If it never does, check com_port in config.yaml.")
 
-				d.signalStop()
+				d.serial.StartReconnecting()
+
+				// anything else: keep trying too
+			} else {
+				d.serial.StartReconnecting()
 			}
 		}
 	}()

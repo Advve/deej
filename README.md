@@ -41,6 +41,7 @@ It has two parts: a small desktop app written in Go, and an Arduino board with a
 
 - **Builds and runs on current Linux distributions.** The original's tray icon needed WebKit2GTK 4.0 and libappindicator3, which Ubuntu 24.04 and other current distributions no longer ship. This fork uses a tray library that talks to the desktop over D-Bus, so the Linux build is a single static binary that needs no extra packages.
 - **Works with current CH340 drivers on Windows.** Many Arduino Nano clones use a CH340 USB chip. Since driver version 3.8 (2023), Windows returns empty reads from it, and the original deej connects but never reads a single slider value. This fork waits those out, so deej works on both old and new drivers.
+- **Reconnects automatically.** Unplug the board, or let the PC sleep, and deej reconnects as soon as the board is back. It also waits for the board at startup instead of quitting. The original had to be restarted.
 - **Support for boards with a screen.** deej now tells the board what each slider controls: a label, an icon, whether the current OS can drive it, and whether its app is running. It also sends a keepalive, so the board can tell when deej isn't running. See [Boards with a screen](#boards-with-a-screen).
 - **[`deej-5-sliders-oled`](./arduino/deej-5-sliders-oled) firmware** for an Arduino Nano with 5 knobs and a 1.3" OLED, which shows all of that.
 - **Two new optional config keys,** `slider_labels` and `slider_icons`, to choose what the screen shows.
@@ -64,8 +65,9 @@ Everything stays compatible:
   - A specific audio device, by name (Windows only)
 - Edit the config while deej is running: it reloads automatically
 - Show labels, icons and app status on a board with a screen
+- Reconnects by itself when the board is unplugged and plugged back in, or wakes up after sleep
 - Runs from the system tray, uses around 10 MB of memory
-- Notifications when something's wrong (wrong COM port, broken config)
+- Notifications when something's wrong (board not found, broken config)
 
 ## How it works
 
@@ -236,7 +238,8 @@ Releases are built by GitHub Actions; see [Releasing](./docs/CONTRIBUTING.md#rel
 
 ## Troubleshooting
 
-- **"Can't connect to COMx"**: the port in `config.yaml` is wrong, or the board isn't plugged in. The port can change when you use a different USB socket.
+- **"Waiting for COMx"**: the board isn't plugged in, or the port in `config.yaml` is wrong. deej keeps waiting and connects as soon as the port appears. The port can change when you use a different USB socket; Device Manager shows the current one.
+- **Flashing the board while deej runs**: deej retries the port every 2 seconds and lets go of a busy one, but the upload can occasionally lose the race for the port. If it does, upload again, or quit deej while flashing.
 - **deej connects but nothing happens when you move a slider**: check the board in the Arduino serial monitor first. With the original deej and a CH340 board, it can also be the driver problem this fork fixes.
 - **"This serial port is busy"**: close the Arduino serial monitor, or any other program using the port.
 - deej writes a log to `logs/deej-latest-run.log` next to the executable.
