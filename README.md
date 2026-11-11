@@ -1,11 +1,15 @@
-# deej
+<p align="center">
+  <img src="docs/banner.svg" alt="deej - a hardware volume mixer for your PC" width="720">
+</p>
 
-<p>
+<p align="center">
   <a href="https://github.com/Advve/deej/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/Advve/deej/build.yml?branch=main&label=build" alt="Build status"></a>
-  <a href="https://github.com/Advve/deej/releases/latest"><img src="https://img.shields.io/github/v/release/Advve/deej?label=version" alt="Version"></a>
+  <a href="https://github.com/Advve/deej/releases/latest"><img src="https://img.shields.io/github/v/release/Advve/deej?label=version&color=8e54e9" alt="Version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/Advve/deej?color=blue" alt="License: MIT"></a>
+  <br>
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux-1d2230" alt="Platforms: Windows, Linux">
   <img src="https://img.shields.io/badge/Go-1.22-00ADD8?logo=go&logoColor=white" alt="Go 1.22">
+  <img src="https://img.shields.io/badge/hardware-Arduino-4776e6?logo=arduino&logoColor=white" alt="Hardware: Arduino">
 </p>
 
 deej is an **open-source hardware volume mixer** for Windows and Linux PCs. Turn real knobs or sliders to **control the volume of individual apps** (your music player, the game you're playing, your voice chat) without leaving what you're doing.
