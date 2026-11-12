@@ -221,12 +221,17 @@ Download deej from the [latest release](https://github.com/Advve/deej/releases/l
 
 ### Linux
 
-1. Put `deej-linux-amd64` (or `-arm64`) and `config.yaml` in the same folder, and make the program executable: `chmod +x deej-linux-amd64`.
-2. Set `com_port`, usually `/dev/ttyUSB0`.
+1. Install the program and the config in the standard places:
+   ```bash
+   install -Dm755 deej-linux-amd64 ~/.local/bin/deej    # or deej-linux-arm64
+   install -Dm644 config.yaml ~/.config/deej/config.yaml
+   ```
+   The log goes to `~/.local/state/deej/` (`$XDG_CONFIG_HOME` and `$XDG_STATE_HOME` are respected). Keeping `config.yaml` in the same folder as the program, like on Windows, works too.
+2. Set `com_port` in `~/.config/deej/config.yaml`, usually `/dev/ttyUSB0`.
 3. Make sure your user can open serial ports: `sudo usermod -aG dialout $USER`, then log out and back in.
 4. Use Linux app names in `slider_mapping` (`spotify`, not `spotify.exe`).
 
-The tray icon uses the StatusNotifierItem (AppIndicator) standard. KDE Plasma, Xfce, Cinnamon, MATE, Budgie and most other desktops show it. GNOME needs the "AppIndicator and KStatusNotifierItem Support" extension, which Ubuntu enables by default. Without a tray, deej still works but has no icon. Stop it with `pkill deej-linux` (or whatever you named the file). "Edit configuration" in the tray menu opens `config.yaml` in your default text editor, and **Start at login** adds deej to your desktop's autostart (`~/.config/autostart/deej.desktop`).
+The tray icon uses the StatusNotifierItem (AppIndicator) standard. KDE Plasma, Xfce, Cinnamon, MATE, Budgie and most other desktops show it. GNOME needs the "AppIndicator and KStatusNotifierItem Support" extension, which Ubuntu enables by default. Without a tray, deej still works but has no icon. Stop it with `pkill deej` (or whatever you named the file). "Edit configuration" in the tray menu opens `config.yaml` in your default text editor, and **Start at login** adds deej to your desktop's autostart (`~/.config/autostart/deej.desktop`).
 
 ## Building from source
 
@@ -246,7 +251,7 @@ Releases are built by GitHub Actions; see [Releasing](./docs/CONTRIBUTING.md#rel
 - **Flashing the board while deej runs**: deej retries the port every 2 seconds and lets go of a busy one, but the upload can occasionally lose the race for the port. If it does, upload again, or quit deej while flashing.
 - **deej connects but nothing happens when you move a slider**: check the board in the Arduino serial monitor first. With the original deej and a CH340 board, it can also be the driver problem this fork fixes.
 - **"This serial port is busy"**: close the Arduino serial monitor, or any other program using the port.
-- deej writes a log to `logs/deej-latest-run.log` next to the executable.
+- deej writes a log to `logs/deej-latest-run.log` next to the executable, or on Linux with the config in `~/.config/deej`, to `~/.local/state/deej/deej-latest-run.log`. The first lines say which config file and log folder it uses.
 
 ## Credits
 
@@ -256,11 +261,13 @@ Releases are built by GitHub Actions; see [Releasing](./docs/CONTRIBUTING.md#rel
 
 ## Changelog
 
-- **Unreleased**
+- **0.3.0**, tray theme and autostart
   - The tray menu follows the Windows dark/light theme, and switches when you change it
   - "Start with Windows" (Linux: "Start at login") in the tray menu, instead of copying a shortcut
     to the Startup folder
   - deej finds `config.yaml` next to the program even when started from another folder
+  - Linux: the program can go in `~/.local/bin` with the config in `~/.config/deej/config.yaml`
+    and the log in `~/.local/state/deej/`; a `config.yaml` next to the program still works
 
 - **0.2.0**, automatic reconnecting
   - Reconnects automatically when the board is unplugged and plugged back in, or after the PC
