@@ -1,7 +1,6 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-Machine-specific notes, if present, are in `CLAUDE.local.md` (not committed).
 
 ## What this is
 
@@ -126,7 +125,7 @@ Same scheme as the author's wled-audio-sync and RivalGUI repos. Full steps are i
 ## Project rules
 
 - **Stage files by name, never `git add .` / `-A`.** The checkout can hold untracked local files that must not
-  be published; `CLAUDE.local.md` says which.
+  be published.
 - **Keep personal data out of committed files:** no real IPs, usernames or local paths.
 - **Credit the original author** (Omri Harel) and link the original repo. Report this fork's problems here,
   not to the original Discord.
