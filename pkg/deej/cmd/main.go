@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/omriharel/deej/pkg/deej"
 )
@@ -35,6 +36,8 @@ func main() {
 		fmt.Println("deej", version)
 		os.Exit(0)
 	}
+
+	useExecutableDir()
 
 	// first we need a logger
 	logger, err := deej.NewLogger(buildType)
@@ -71,5 +74,25 @@ func main() {
 	// onwards, to glory
 	if err = d.Initialize(); err != nil {
 		named.Fatalw("Failed to initialize deej", "error", err)
+	}
+}
+
+// useExecutableDir switches to the folder deej.exe is in when config.yaml isn't in the current
+// folder but is next to the program. config.yaml and logs/ are looked up relative to the current
+// folder, and Windows runs startup (Run key) programs with System32 as the current folder.
+func useExecutableDir() {
+	if _, err := os.Stat("config.yaml"); err == nil {
+		return
+	}
+	exe, err := os.Executable()
+	if err != nil {
+		return
+	}
+	if exe, err = filepath.EvalSymlinks(exe); err != nil {
+		return
+	}
+	dir := filepath.Dir(exe)
+	if _, err := os.Stat(filepath.Join(dir, "config.yaml")); err == nil {
+		_ = os.Chdir(dir)
 	}
 }

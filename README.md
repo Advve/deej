@@ -217,7 +217,7 @@ Download deej from the [latest release](https://github.com/Advve/deej/releases/l
 1. Put `deej.exe` and `config.yaml` in the same folder. deej isn't code-signed, so SmartScreen may warn the first time: **More info → Run anyway**.
 2. Set `com_port` to your board's port. Device Manager → Ports (COM & LPT) shows it.
 3. Run `deej.exe`. It appears in the system tray.
-4. Optional: to start deej with Windows, put a shortcut to it in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`.
+4. Optional: to start deej with Windows, tick **Start with Windows** in the tray menu. It adds deej to your startup apps (Task Manager → Startup apps lists it), with no shortcuts to copy. If you move the folder later, run deej once from the new place and it updates the entry.
 
 ### Linux
 
@@ -226,7 +226,7 @@ Download deej from the [latest release](https://github.com/Advve/deej/releases/l
 3. Make sure your user can open serial ports: `sudo usermod -aG dialout $USER`, then log out and back in.
 4. Use Linux app names in `slider_mapping` (`spotify`, not `spotify.exe`).
 
-The tray icon uses the StatusNotifierItem (AppIndicator) standard. KDE Plasma, Xfce, Cinnamon, MATE, Budgie and most other desktops show it. GNOME needs the "AppIndicator and KStatusNotifierItem Support" extension, which Ubuntu enables by default. Without a tray, deej still works but has no icon. Stop it with `pkill deej-linux` (or whatever you named the file). "Edit configuration" in the tray menu opens `config.yaml` in your default text editor.
+The tray icon uses the StatusNotifierItem (AppIndicator) standard. KDE Plasma, Xfce, Cinnamon, MATE, Budgie and most other desktops show it. GNOME needs the "AppIndicator and KStatusNotifierItem Support" extension, which Ubuntu enables by default. Without a tray, deej still works but has no icon. Stop it with `pkill deej-linux` (or whatever you named the file). "Edit configuration" in the tray menu opens `config.yaml` in your default text editor, and **Start at login** adds deej to your desktop's autostart (`~/.config/autostart/deej.desktop`).
 
 ## Building from source
 
@@ -255,6 +255,12 @@ Releases are built by GitHub Actions; see [Releasing](./docs/CONTRIBUTING.md#rel
 - The community builds in [community.md](./community.md) are by their respective makers.
 
 ## Changelog
+
+- **Unreleased**
+  - The tray menu follows the Windows dark/light theme, and switches when you change it
+  - "Start with Windows" (Linux: "Start at login") in the tray menu, instead of copying a shortcut
+    to the Startup folder
+  - deej finds `config.yaml` next to the program even when started from another folder
 
 - **0.2.0**, automatic reconnecting
   - Reconnects automatically when the board is unplugged and plugged back in, or after the PC
