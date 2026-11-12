@@ -74,10 +74,16 @@ Same scheme as the author's wled-audio-sync and RivalGUI repos. Full steps are i
 ## Architecture (`pkg/deej`)
 
 - **Start-up** (`cmd/main.go`):
-  - Order: flags, then `useExecutableDir()`, then the logger, then `NewDeej` and `Initialize`.
-  - `config.yaml`, `logs/` and `preferences.yaml` are relative paths. If `config.yaml` isn't in the current
-    folder but is next to the exe, main switches to the exe's folder.
-  - This matters for autostart: Windows runs Run-key programs with System32 as the current folder.
+  - Order: flags, then `deej.LocateFiles()`, then the logger, then `NewDeej` and `Initialize`.
+  - `LocateFiles` (`paths.go`) sets `userConfigFilepath` and `logDirectory` (the log, crash logs and
+    `preferences.yaml`). It uses the first place that has `config.yaml`:
+    1. The current folder, with relative paths, which is the original behaviour.
+    2. The exe's folder, after switching to it. This matters for autostart: Windows runs Run-key programs
+       with System32 as the current folder.
+    3. On Linux only, `$XDG_CONFIG_HOME/deej` (default `~/.config/deej`), with logs in
+       `$XDG_STATE_HOME/deej` (default `~/.local/state/deej`).
+  - If none of them has it, Linux uses the XDG folders, so the "can't find" toast points there.
+  - Anything that touches these files must use the variables, never a literal `config.yaml` or `logs`.
 - **`deej.go`:** wires config, serial, the session map and the tray. `systray.Run` must stay on the main
   goroutine. `DEEJ_NO_TRAY_ICON` skips the tray.
 - **`config.go`:** viper loads `config.yaml` and watches it for changes; subscribers reload on change.

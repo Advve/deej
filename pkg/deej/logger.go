@@ -15,8 +15,7 @@ const (
 	buildTypeDev     = "dev"
 	buildTypeRelease = "release"
 
-	logDirectory = "logs"
-	logFilename  = "deej-latest-run.log"
+	logFilename = "deej-latest-run.log"
 )
 
 // NewLogger provides a logger instance for the whole program

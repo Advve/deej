@@ -157,10 +157,10 @@ func notes(v string, entry []string) string {
 | Linux, 64-bit ARM (e.g. Raspberry Pi 4/5) | `+"`deej-linux-arm64`"+` |
 | Example configuration | `+"`config.yaml`"+` |
 
-Each program is a single file; nothing to install. Put it in a folder together with `+"`config.yaml`"+`, set `+"`com_port`"+` and `+"`slider_mapping`"+` in the config, and start it.
+Each program is a single file; nothing to install. Set `+"`com_port`"+` and `+"`slider_mapping`"+` in `+"`config.yaml`"+`, and start deej.
 
-- **Windows:** keep the folder somewhere permanent (e.g. `+"`%%LOCALAPPDATA%%\\Programs\\deej\\`"+`). deej isn't code-signed, so SmartScreen may warn the first time: **More info → Run anyway**. With Smart App Control switched on, Windows blocks unsigned apps completely.
-- **Linux:** `+"`install -m 755 deej-linux-amd64 ~/.local/bin/deej`"+`, add yourself to the `+"`dialout`"+` group for the serial port, and use Linux app names in the config (`+"`spotify`"+`, not `+"`spotify.exe`"+`). Needs PulseAudio or PipeWire; plain GNOME needs the *AppIndicator and KStatusNotifierItem Support* extension for the tray icon.
+- **Windows:** put `+"`deej.exe`"+` and `+"`config.yaml`"+` in one folder somewhere permanent (e.g.`+"`%%LOCALAPPDATA%%\\Programs\\deej\\`"+`). deej isn't code-signed, so SmartScreen may warn the first time: **More info → Run anyway**. With Smart App Control switched on, Windows blocks unsigned apps completely.
+- **Linux:** `+"`install -Dm755 deej-linux-amd64 ~/.local/bin/deej`"+` and `+"`install -Dm644 config.yaml ~/.config/deej/config.yaml`"+` (the log goes to `+"`~/.local/state/deej/`"+`), add yourself to the `+"`dialout`"+` group for the serial port, and use Linux app names in the config (`+"`spotify`"+`, not `+"`spotify.exe`"+`). Needs PulseAudio or PipeWire; plain GNOME needs the *AppIndicator and KStatusNotifierItem Support* extension for the tray icon.
 - **Arduino:** flash one of the sketches in [`+"`arduino/`"+`](https://github.com/Advve/deej/tree/v%[1]s/arduino): `+"`deej-5-sliders-vanilla`"+` for any board, or `+"`deej-5-sliders-oled`"+` for a Nano with an OLED screen.
 
 Verify a download with `+"`SHA256SUMS.txt`"+`: `+"`sha256sum -c SHA256SUMS.txt --ignore-missing`"+` (Linux) or `+"`Get-FileHash <file>`"+` (PowerShell). `+"`THIRD-PARTY-NOTICES.txt`"+` lists the licenses of the libraries inside the app.

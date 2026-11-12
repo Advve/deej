@@ -2,7 +2,6 @@ package deej
 
 import (
 	"fmt"
-	"path"
 	"strings"
 	"time"
 
@@ -41,14 +40,9 @@ type CanonicalConfig struct {
 	internalConfig *viper.Viper
 }
 
+// where config.yaml and preferences.yaml are: see paths.go
 const (
-	userConfigFilepath     = "config.yaml"
-	internalConfigFilepath = "preferences.yaml"
-
-	userConfigName     = "config"
 	internalConfigName = "preferences"
-
-	userConfigPath = "."
 
 	configType = "yaml"
 
@@ -63,9 +57,6 @@ const (
 	defaultCOMPort  = "COM4"
 	defaultBaudRate = 9600
 )
-
-// has to be defined as a non-constant because we're using path.Join
-var internalConfigPath = path.Join(".", logDirectory)
 
 var defaultSliderMapping = func() *sliderMap {
 	emptyMap := newSliderMap()
@@ -87,9 +78,8 @@ func NewConfig(logger *zap.SugaredLogger, notifier Notifier) (*CanonicalConfig, 
 
 	// distinguish between the user-provided config (config.yaml) and the internal config (logs/preferences.yaml)
 	userConfig := viper.New()
-	userConfig.SetConfigName(userConfigName)
+	userConfig.SetConfigFile(userConfigFilepath)
 	userConfig.SetConfigType(configType)
-	userConfig.AddConfigPath(userConfigPath)
 
 	userConfig.SetDefault(configKeySliderMapping, map[string][]string{})
 	userConfig.SetDefault(configKeyInvertSliders, false)
@@ -99,7 +89,7 @@ func NewConfig(logger *zap.SugaredLogger, notifier Notifier) (*CanonicalConfig, 
 	internalConfig := viper.New()
 	internalConfig.SetConfigName(internalConfigName)
 	internalConfig.SetConfigType(configType)
-	internalConfig.AddConfigPath(internalConfigPath)
+	internalConfig.AddConfigPath(logDirectory)
 
 	cc.userConfig = userConfig
 	cc.internalConfig = internalConfig
@@ -116,8 +106,7 @@ func (cc *CanonicalConfig) Load() error {
 	// make sure it exists
 	if !util.FileExists(userConfigFilepath) {
 		cc.logger.Warnw("Config file not found", "path", userConfigFilepath)
-		cc.notifier.Notify("Can't find configuration!",
-			fmt.Sprintf("%s must be in the same directory as deej. Please re-launch", userConfigFilepath))
+		cc.notifier.Notify("Can't find configuration!", configMissingHint+" Then start deej again.")
 
 		return fmt.Errorf("config file doesn't exist: %s", userConfigFilepath)
 	}
