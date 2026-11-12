@@ -270,7 +270,7 @@ Releases are built by GitHub Actions; see [Releasing](./docs/CONTRIBUTING.md#rel
 
 ## Changelog
 
-- **Unreleased**
+- **0.4.0**, update check and one-click install
   - New: update check and one-click install from the tray. When a new version is out, an *Update
     available* item appears in the menu with one notification; *Install and restart* downloads it,
     verifies its signature and restarts deej. Turn off the daily check under *Updates → Check
