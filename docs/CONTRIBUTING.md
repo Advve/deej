@@ -30,4 +30,6 @@ To publish version X.Y.Z:
 3. Check: `go run ./tools/release --check X.Y.Z`. `go run ./tools/release X.Y.Z` shows the release notes. The downloads table and install notes are a template inside that tool.
 4. Commit, then tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`.
 
-On the tag, CI checks the tag against the version, builds, and publishes the release "deej X.Y.Z" with the three programs, `config.yaml`, `SHA256SUMS.txt`, `THIRD-PARTY-NOTICES.txt` and the generated notes.
+On the tag, CI checks the tag against the version, builds, and publishes the release "deej X.Y.Z" with the three programs, `config.yaml`, `SHA256SUMS.txt`, `SHA256SUMS.txt.sig`, `THIRD-PARTY-NOTICES.txt` and the generated notes.
+
+deej's updater installs a release only if `SHA256SUMS.txt.sig` matches the public key built into deej (`updatePublicKey` in `pkg/deej/update.go`), so the repository needs the `UPDATE_SIGNING_KEY` secret. The key pair was made once with `go run ./tools/release keygen <file>`. Keep a backup of the private key: if it's lost, users have to update by hand once more to get a build with a new public key.

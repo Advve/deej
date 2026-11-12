@@ -29,6 +29,12 @@ type Deej struct {
 	stopChannel chan bool
 	version     string
 	verbose     bool
+
+	// updates (see update.go)
+	appVersion   string // "X.Y.Z"
+	releaseBuild bool   // automatic update checks only in release builds
+	justUpdated  bool   // started by an update (--updated)
+	restartExe   string // set by the tray after installing an update: started once deej has stopped
 }
 
 // NewDeej creates a Deej instance
@@ -86,6 +92,9 @@ func NewDeej(logger *zap.SugaredLogger, verbose bool) (*Deej, error) {
 func (d *Deej) Initialize() error {
 	d.logger.Debug("Initializing")
 
+	// the program file the last update replaced
+	go removeOldExe()
+
 	// load the config for the first time
 	if err := d.config.Load(); err != nil {
 		d.logger.Errorw("Failed to load config during initialization", "error", err)
@@ -118,6 +127,12 @@ func (d *Deej) Initialize() error {
 // SetVersion causes deej to add a version string to its tray menu if called before Initialize
 func (d *Deej) SetVersion(version string) {
 	d.version = version
+}
+
+// SetUpdateInfo tells the updater which version this is, whether it's a release build (only those
+// check automatically) and whether this copy was started by an update. Call it before Initialize.
+func (d *Deej) SetUpdateInfo(version string, releaseBuild, justUpdated bool) {
+	d.appVersion, d.releaseBuild, d.justUpdated = version, releaseBuild, justUpdated
 }
 
 // Verbose returns a boolean indicating whether deej is running in verbose mode
@@ -181,10 +196,18 @@ func (d *Deej) run() {
 	if err := d.stop(); err != nil {
 		d.logger.Warnw("Failed to stop deej", "error", err)
 		os.Exit(1)
-	} else {
-		// exit with 0
-		os.Exit(0)
 	}
+
+	// an update was installed: start the new copy now that the serial port is free
+	if d.restartExe != "" {
+		if err := restartUpdated(d.restartExe); err != nil {
+			d.logger.Warnw("Failed to start the updated deej", "error", err)
+			d.notifier.Notify("Update installed", "It starts the next time you start deej.")
+		}
+	}
+
+	// exit with 0
+	os.Exit(0)
 }
 
 func (d *Deej) signalStop() {

@@ -2,7 +2,9 @@ package deej
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -38,7 +40,16 @@ type CanonicalConfig struct {
 
 	userConfig     *viper.Viper
 	internalConfig *viper.Viper
+	prefMu         sync.Mutex // guards internalConfig: the tray writes it while a reload reads it
 }
+
+// Keys deej keeps for itself in preferences.yaml, changed from the tray menu. They stay out of
+// config.yaml, so the user's config (and the original deej) never sees them.
+const (
+	prefKeyUpdateCheck     = "update_check"            // check GitHub for new versions daily
+	prefKeySkipVersion     = "update_skip_version"     // a release the user chose to skip
+	prefKeyNotifiedVersion = "update_notified_version" // the last release a notification was shown for
+)
 
 // where config.yaml and preferences.yaml are: see paths.go
 const (
@@ -90,6 +101,7 @@ func NewConfig(logger *zap.SugaredLogger, notifier Notifier) (*CanonicalConfig, 
 	internalConfig.SetConfigName(internalConfigName)
 	internalConfig.SetConfigType(configType)
 	internalConfig.AddConfigPath(logDirectory)
+	internalConfig.SetDefault(prefKeyUpdateCheck, true)
 
 	cc.userConfig = userConfig
 	cc.internalConfig = internalConfig
@@ -125,6 +137,9 @@ func (cc *CanonicalConfig) Load() error {
 
 		return fmt.Errorf("read user config: %w", err)
 	}
+
+	cc.prefMu.Lock()
+	defer cc.prefMu.Unlock()
 
 	// load the internal config - this doesn't have to exist, so it can error
 	if err := cc.internalConfig.ReadInConfig(); err != nil {
@@ -240,6 +255,29 @@ func (cc *CanonicalConfig) populateFromVipers() error {
 	cc.logger.Debug("Populated config fields from vipers")
 
 	return nil
+}
+
+func (cc *CanonicalConfig) prefBool(key string) bool {
+	cc.prefMu.Lock()
+	defer cc.prefMu.Unlock()
+	return cc.internalConfig.GetBool(key)
+}
+
+func (cc *CanonicalConfig) prefString(key string) string {
+	cc.prefMu.Lock()
+	defer cc.prefMu.Unlock()
+	return cc.internalConfig.GetString(key)
+}
+
+// setPref changes a preference and saves preferences.yaml.
+func (cc *CanonicalConfig) setPref(key string, value any) error {
+	cc.prefMu.Lock()
+	defer cc.prefMu.Unlock()
+	cc.internalConfig.Set(key, value)
+	if err := util.EnsureDirExists(logDirectory); err != nil {
+		return err
+	}
+	return cc.internalConfig.WriteConfigAs(filepath.Join(logDirectory, internalConfigName+"."+configType))
 }
 
 func (cc *CanonicalConfig) onConfigReloaded() {

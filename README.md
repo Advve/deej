@@ -233,6 +233,15 @@ Download deej from the [latest release](https://github.com/Advve/deej/releases/l
 
 The tray icon uses the StatusNotifierItem (AppIndicator) standard. KDE Plasma, Xfce, Cinnamon, MATE, Budgie and most other desktops show it. GNOME needs the "AppIndicator and KStatusNotifierItem Support" extension, which Ubuntu enables by default. Without a tray, deej still works but has no icon. Stop it with `pkill deej` (or whatever you named the file). "Edit configuration" in the tray menu opens `config.yaml` in your default text editor, and **Start at login** adds deej to your desktop's autostart (`~/.config/autostart/deej.desktop`).
 
+### Updates
+
+A couple of minutes after it starts, and then once a day, deej asks GitHub for the latest release. That request is all it sends. When a newer version is out, an **Update available** item appears at the top of the tray menu and you get one notification for it:
+
+- **Install and restart** downloads the new program, checks it against the release's signed `SHA256SUMS.txt`, swaps it in place of the old one and restarts deej. `config.yaml`, the log and *Start with Windows* stay as they were.
+- **What's new** opens the release page. **Skip this version** hides it until a newer one comes out.
+
+If deej can't replace its own file (for example, it's in a folder you can't write to), the item says **Download…** and opens the release page instead. Untick **Updates → Check automatically** in the tray menu to stop the daily check; **Updates → Check now** checks right away. The setting is kept in `preferences.yaml` next to the log, not in `config.yaml`.
+
 ## Building from source
 
 You need Go 1.22 or newer. deej is pure Go: no C compiler or system libraries, and any OS can build for the others.
@@ -261,6 +270,13 @@ Releases are built by GitHub Actions; see [Releasing](./docs/CONTRIBUTING.md#rel
 
 ## Changelog
 
+- **Unreleased**
+  - New: update check and one-click install from the tray. When a new version is out, an *Update
+    available* item appears in the menu with one notification; *Install and restart* downloads it,
+    verifies its signature and restarts deej. Turn off the daily check under *Updates → Check
+    automatically*.
+  - **Install this version by hand one last time.** Older versions have no updater, so they won't
+    announce it; from this version on, later releases install from the tray.
 - **0.3.0**, tray theme and autostart
   - The tray menu follows the Windows dark/light theme, and switches when you change it
   - "Start with Windows" (Linux: "Start at login") in the tray menu, instead of copying a shortcut

@@ -20,12 +20,14 @@ var (
 
 	verbose     bool
 	showVersion bool
+	updated     bool
 )
 
 func init() {
 	flag.BoolVar(&verbose, "verbose", false, "show verbose logs (useful for debugging serial)")
 	flag.BoolVar(&verbose, "v", false, "shorthand for --verbose")
 	flag.BoolVar(&showVersion, "version", false, "print the version and exit")
+	flag.BoolVar(&updated, "updated", false, "internal: started by the updater after installing a new version")
 	flag.Parse()
 }
 
@@ -72,6 +74,7 @@ func main() {
 		versionString += " (" + buildType + ")"
 	}
 	d.SetVersion(versionString)
+	d.SetUpdateInfo(version, buildType == "release", updated)
 
 	// onwards, to glory
 	if err = d.Initialize(); err != nil {

@@ -98,13 +98,27 @@ Same scheme as the author's wled-audio-sync and RivalGUI repos. Full steps are i
   - `>H` header, `>S` per slider (icon, flags, label), `>E` end.
   - `>A` is a running-apps mask that doubles as the keepalive.
   - If you change the protocol, change `arduino/deej-5-sliders-oled` in the same commit.
+- **`update.go` / `tray_update.go`:** update check and one-click install.
+  - The check runs 2 min after start, then daily, in release builds only; "Check now" works in any
+    build. It asks GitHub `releases/latest` with an ETag. `DEEJ_UPDATE_URL` points it at a fake release
+    JSON for testing.
+  - Prefs live in `preferences.yaml` (`update_check`, `update_skip_version`, `update_notified_version`,
+    via `setPref`), never in `config.yaml`.
+  - **Install:** verify `SHA256SUMS.txt.sig` (ed25519, `updatePublicKey`), download this OS/arch's asset
+    to `<exe>.new` and check its hash, then rename `<exe>` → `<exe>.old` and `.new` → `<exe>`. The tray
+    sets `restartExe` and stops deej; `run()` starts the new copy with `--updated` *after* the serial
+    port is closed.
+  - Release CI signs `SHA256SUMS.txt` with the `UPDATE_SIGNING_KEY` secret (`tools/release sign`).
+    Every release must carry the `.sig`.
 - **`session_*` / `session_finder_*`:** WASAPI (go-wca) on Windows, PulseAudio/PipeWire on Linux.
   `session_map.go` maps slider targets (including `master`, `deej.current`, `deej.unmapped`) to sessions.
 - **`tray.go`:** uses fyne.io/systray, which on Linux talks D-Bus StatusNotifierItem and needs no GTK.
   Menu items:
+  - Update available (hidden until a check finds one)
   - Edit configuration
   - Re-scan sessions
   - Start with Windows / Start at login
+  - Updates (Check automatically, Check now)
   - Version
   - Quit
 - **Platform split by build tags:** `_windows.go` vs `_other.go` (`//go:build !windows`), or `_linux.go`.

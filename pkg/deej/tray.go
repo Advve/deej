@@ -24,6 +24,8 @@ func (d *Deej) initializeTray(onDone func()) {
 		systray.SetTitle("deej")
 		systray.SetTooltip("deej")
 
+		updates := d.addUpdateAvailable()
+
 		editConfig := systray.AddMenuItem("Edit configuration", "Open config file with notepad")
 		editConfig.SetIcon(icon.EditConfig)
 
@@ -32,6 +34,7 @@ func (d *Deej) initializeTray(onDone func()) {
 
 		systray.AddSeparator()
 		autostart := systray.AddMenuItemCheckbox(autostartLabel, autostartTooltip, autostartEnabled())
+		updates.addSettings()
 
 		if d.version != "" {
 			systray.AddSeparator()
